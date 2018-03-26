@@ -1,0 +1,19 @@
+syntax="proto3";
+option java_package="cn.dmandp.common";
+option java_multiple_files=true;
+
+
+message TTUser {
+	int32 uId=1;
+	string uName=2;
+	string uPhoto=3;
+	string uPassword=4;
+	repeated int32 uFriends=5;
+}
+
+message TTMessage {
+	string mContent=1;
+	uint64 mTime=2;
+	int32 mFromId=3;
+	int32 mToId=4;
+}
