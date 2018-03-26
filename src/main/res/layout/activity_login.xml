@@ -12,40 +12,37 @@
         android:orientation="vertical">
 
         <ImageView
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="45dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/logo"
             android:layout_gravity="center" />
-
-        <TextView
-            android:layout_marginTop="30dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="欢迎登录TT"
-            android:textSize="25sp" />
-
         <EditText
             android:id="@+id/login_account_edittext"
-            android:layout_marginTop="20dp"
-            android:layout_width="300dp"
+            android:layout_marginTop="40dp"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:hint="账号" />
 
         <EditText
             android:id="@+id/login_password_edittext"
-            android:layout_width="300dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:hint="密码" />
 
         <Button
             android:id="@+id/login_login_button"
-            android:layout_width="300dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginLeft="15dp"
             android:layout_gravity="center"
             android:background="@drawable/button_red"
             android:text="登录" />
