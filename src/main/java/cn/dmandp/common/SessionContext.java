@@ -1,6 +1,6 @@
 package cn.dmandp.common;
 
-import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,19 +13,19 @@ public class SessionContext {
     private TTUser bindUser;
     private Integer uID;
     private Boolean login = false;
-    private AsynchronousSocketChannel socketChannel;
+    private SocketChannel socketChannel;
     private Map<String, Object> Attributes;
 
-    public SessionContext(AsynchronousSocketChannel socketChannel) {
+    public SessionContext(SocketChannel socketChannel) {
         this.socketChannel = socketChannel;
         Attributes = new HashMap<String, Object>();
     }
 
-    public AsynchronousSocketChannel getSocketChannel() {
+    public SocketChannel getSocketChannel() {
         return socketChannel;
     }
 
-    public void setSocketChannel(AsynchronousSocketChannel socketChannel) {
+    public void setSocketChannel(SocketChannel socketChannel) {
         this.socketChannel = socketChannel;
     }
 
