@@ -11,7 +11,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -21,6 +20,7 @@ import cn.dmandp.common.SessionContext;
 import cn.dmandp.common.TTUser;
 import cn.dmandp.common.TYPE;
 import cn.dmandp.context.TtApplication;
+import cn.dmandp.netio.Result;
 
 public class LoginActivity extends Activity implements View.OnClickListener {
     Button newButton;
@@ -34,14 +34,14 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        loginButton = (Button) findViewById(R.id.login_login_button);
+        loginButton = findViewById(R.id.login_login_button);
         loginButton.setOnClickListener(this);
-        newButton = (Button) findViewById(R.id.login_new_user_button);
+        newButton = findViewById(R.id.login_new_user_button);
         newButton.setOnClickListener(this);
-        forgetButton = (Button) findViewById(R.id.login_forget_password_button);
+        forgetButton = findViewById(R.id.login_forget_password_button);
         forgetButton.setOnClickListener(this);
-        accountText = (EditText) findViewById(R.id.login_account_edittext);
-        passwordText = (EditText) findViewById(R.id.login_password_edittext);
+        accountText = findViewById(R.id.login_account_edittext);
+        passwordText = findViewById(R.id.login_password_edittext);
 
     }
 
@@ -52,7 +52,9 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                 new LoginTask().execute(accountText.getText().toString(), passwordText.getText().toString());
                 break;
             case R.id.login_new_user_button:
-
+                Intent intent = new Intent(this, RegisterActivity.class);
+                startActivity(intent);
+                break;
             default:
         }
     }
@@ -65,8 +67,8 @@ public class LoginActivity extends Activity implements View.OnClickListener {
             try {
                 uId = Integer.parseInt(strings[0]);
             } catch (Exception e) {
-                result.setResultcode((byte) 0);
-                result.setResultMessage("账号不是数字！");
+                result.setResultStatus((byte) 0);
+                result.setResultBody("账号不是数字！");
                 return result;
             }
             String uPassword = strings[1];
@@ -74,8 +76,8 @@ public class LoginActivity extends Activity implements View.OnClickListener {
             SessionContext sessionContext = application.getSessionContext();
             if (sessionContext == null) {
                 Log.i("LoginActivity", "sessionContext is null");
-                result.setResultcode((byte) 0);
-                result.setResultMessage("sessionContext create fail please check your network!");
+                result.setResultStatus((byte) 0);
+                result.setResultBody("sessionContext create fail please check your network!");
                 return result;
             }
             SocketChannel socketChannel = sessionContext.getSocketChannel();
@@ -96,55 +98,36 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                 receiveBuffer.get(responsecontent);
                 if (responsecontent[0] == TYPE.LOGIN_RESP) {
                     if (responsecontent[1] == RESP_CODE.SUCCESS) {
-                        result.setResultcode((byte) 1);
+                        result.setResultStatus((byte) 1);
                         return result;
                     }
-                    result.setResultcode((byte) 0);
-                    result.setResultMessage(new String(responsecontent, 2, responsecontent.length - 2));
+                    result.setResultStatus((byte) 0);
+                    result.setResultBody(new String(responsecontent, 2, responsecontent.length - 2));
                     return result;
                 } else {
-                    result.setResultcode((byte) 0);
-                    result.setResultMessage("未知的服务器响应：" + new String(responsecontent));
+                    result.setResultStatus((byte) 0);
+                    result.setResultBody("未知的服务器响应：" + new String(responsecontent));
                     return result;
                 }
             } catch (IOException e) {
-                result.setResultcode((byte) 0);
+                result.setResultStatus((byte) 0);
                 Log.e("LoginActivity", e.getMessage());
-                result.setResultMessage("服务器通讯错误！");
+                result.setResultBody("服务器通讯错误！");
                 return result;
             }
         }
 
         @Override
         protected void onPostExecute(Result result) {
-            if (result.getResultcode() == 1) {
+            if (result.getResultStatus() == 1) {
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(intent);
+                SessionContext sessionContext = ((TtApplication) getApplication()).getSessionContext();
+                sessionContext.setLogin(true);
+                //尚未完成
             } else {
-                Toast.makeText(LoginActivity.this, result.getResultMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this, (String) result.getResultBody(), Toast.LENGTH_SHORT).show();
             }
-            super.onPostExecute(result);
-        }
-    }
-
-    class Result {
-        private byte resultcode;
-        private String resultMessage;
-
-        public byte getResultcode() {
-            return resultcode;
-        }
-
-        public void setResultcode(byte resultcode) {
-            this.resultcode = resultcode;
-        }
-
-        public String getResultMessage() {
-            return resultMessage;
-        }
-
-        public void setResultMessage(String resultMessage) {
-            this.resultMessage = resultMessage;
         }
     }
 }

@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="cn.dmandp.tt.LoginActivity">
+    tools:context="cn.dmandp.tt.RegisterActivity">
 
     <LinearLayout
-        android:id="@+id/login_top_layout"
+        android:id="@+id/register_top_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -17,18 +17,28 @@
             android:layout_height="wrap_content"
             android:src="@drawable/logo"
             android:layout_gravity="center" />
+
         <EditText
-            android:id="@+id/login_account_edittext"
+            android:id="@+id/register_account_edittext"
             android:layout_marginTop="40dp"
             android:layout_width="match_parent"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:hint="账号" />
+            android:hint="账号    //登录用，自定义数字" />
 
         <EditText
-            android:id="@+id/login_password_edittext"
+            android:id="@+id/register_uname_edittext"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:hint="昵称" />
+
+        <EditText
+            android:id="@+id/register_password_edittext"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
             android:layout_width="match_parent"
@@ -38,7 +48,7 @@
             android:hint="密码" />
 
         <Button
-            android:id="@+id/login_login_button"
+            android:id="@+id/register_register_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginRight="15dp"
@@ -47,36 +57,23 @@
             android:layout_gravity="center"
             android:textSize="20sp"
             android:background="@drawable/button_red"
-            android:text="登   录" />
+            android:text="注   册" />
     </LinearLayout>
 
     <RelativeLayout
-        android:id="@+id/login_bottom_layout"
+        android:id="@+id/register_bottom_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/login_top_layout">
 
         <Button
-            android:id="@+id/login_new_user_button"
+            android:id="@+id/register_login_button"
             android:layout_width="70dp"
             android:layout_height="40dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:text="新用户"
-            android:textSize="15dp"
-            android:textColor="#1C86EE"
-            android:background="#00000000" />
-
-        <Button
-            android:id="@+id/login_forget_password_button"
-            android:layout_width="70dp"
-            android:layout_height="40dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_gravity="right"
-            android:text="忘记密码"
+            android:text="已有账号"
             android:textSize="15dp"
             android:textColor="#1C86EE"
             android:background="#00000000" />
