@@ -126,7 +126,7 @@ public class RegisterActivity extends Activity implements View.OnClickListener {
                 startActivity(intent);
                 SessionContext sessionContext = ((TtApplication) getApplication()).getSessionContext();
                 sessionContext.setLogin(true);
-                //尚未完成
+                //ai
             } else {
                 Toast.makeText(RegisterActivity.this, (String) result.getResultBody(), Toast.LENGTH_SHORT).show();
             }
