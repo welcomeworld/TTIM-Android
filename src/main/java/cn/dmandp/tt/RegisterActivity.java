@@ -2,6 +2,7 @@ package cn.dmandp.tt;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -108,6 +109,7 @@ public class RegisterActivity extends Activity implements View.OnClickListener {
             if (responsecontent[0] == TYPE.REGISTER_RESP) {
                 if (responsecontent[1] == RESP_CODE.SUCCESS) {
                     result.setResultStatus((byte) 1);
+                    result.setResultBody(registerUser);
                     return result;
                 }
                 result.setResultStatus((byte) 0);
@@ -122,11 +124,18 @@ public class RegisterActivity extends Activity implements View.OnClickListener {
         @Override
         protected void onPostExecute(Result result) {
             if (result.getResultStatus() == 1) {
-                Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
-                startActivity(intent);
+                TTUser currentUser = (TTUser) result.getResultBody();
+                SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
+                editor.putInt("currentUserId", currentUser.getUId());
+                editor.putString("currentUserPassword", currentUser.getUPassword());
+                editor.commit();
                 SessionContext sessionContext = ((TtApplication) getApplication()).getSessionContext();
                 sessionContext.setLogin(true);
-                //ai
+                sessionContext.setuID(currentUser.getUId());
+                sessionContext.setBindUser(currentUser);
+                Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
             } else {
                 Toast.makeText(RegisterActivity.this, (String) result.getResultBody(), Toast.LENGTH_SHORT).show();
             }

@@ -2,6 +2,7 @@ package cn.dmandp.tt;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -99,6 +100,11 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                 if (responsecontent[0] == TYPE.LOGIN_RESP) {
                     if (responsecontent[1] == RESP_CODE.SUCCESS) {
                         result.setResultStatus((byte) 1);
+                        byte[] returnUserbytes = new byte[responsecontent.length - 2];
+                        System.arraycopy(responsecontent, 2, returnUserbytes, 0, returnUserbytes.length);
+                        TTUser.Builder returnUserBuilder = TTUser.newBuilder(TTUser.parseFrom(returnUserbytes));
+                        returnUserBuilder.setUPassword(loginuser.getUPassword());
+                        result.setResultBody(returnUserBuilder.build());
                         return result;
                     }
                     result.setResultStatus((byte) 0);
@@ -120,11 +126,18 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         @Override
         protected void onPostExecute(Result result) {
             if (result.getResultStatus() == 1) {
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(intent);
+                TTUser currentUser = (TTUser) result.getResultBody();
+                SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
+                editor.putInt("currentUserId", currentUser.getUId());
+                editor.putString("currentUserPassword", currentUser.getUPassword());
+                editor.commit();
                 SessionContext sessionContext = ((TtApplication) getApplication()).getSessionContext();
                 sessionContext.setLogin(true);
-                //尚未完成
+                sessionContext.setuID(currentUser.getUId());
+                sessionContext.setBindUser(currentUser);
+                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
             } else {
                 Toast.makeText(LoginActivity.this, (String) result.getResultBody(), Toast.LENGTH_SHORT).show();
             }
