@@ -12,6 +12,11 @@ public class TTIMDaoHelper extends SQLiteOpenHelper {
     private final String CREATE_FRIENDS = "create table friends (uid int primary key not null,\n" +
             "Uname varchar(30) not null,\n" +
             "Uphoto varchar(30),Upassword varchar(30))";
+    private final String CREATE_MESSAGES = "create table messages(mcontent varchar(400) not null,\n" +
+            "Mtime bigint not null,\n" +
+            "Fromid int not null,\n" +
+            "Toid int not null,\n" +
+            "Primary key (fromid,toid,mtime))";
 
     private Context mContext;
 
@@ -23,6 +28,7 @@ public class TTIMDaoHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_FRIENDS);
+        db.execSQL(CREATE_MESSAGES);
     }
 
     @Override

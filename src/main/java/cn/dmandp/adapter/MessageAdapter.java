@@ -1,4 +1,4 @@
-package cn.dmandp.common;
+package cn.dmandp.adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import cn.dmandp.entity.ChatMessage;
 import cn.dmandp.tt.R;
 
 /**

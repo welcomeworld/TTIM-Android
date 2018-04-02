@@ -1,4 +1,4 @@
-package cn.dmandp.common;
+package cn.dmandp.entity;
 
 /**
  * Created by 萌即正义 on 16/03/2018.

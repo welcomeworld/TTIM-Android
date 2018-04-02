@@ -41,5 +41,13 @@ public interface TYPE {
      * 加入响应
      */
     static final byte JOIN_RESP = 9;
+    /**
+     * 好友信息请求
+     */
+    static final byte FRIENDS_REQ = 10;
+    /**
+     * 好友信息响应
+     */
+    static final byte FRIENDS_RESP = 11;
 }
 

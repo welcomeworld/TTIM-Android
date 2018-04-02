@@ -17,10 +17,10 @@ import java.nio.channels.SocketChannel;
 
 import cn.dmandp.common.Const;
 import cn.dmandp.common.RESP_CODE;
-import cn.dmandp.common.SessionContext;
-import cn.dmandp.common.TTUser;
 import cn.dmandp.common.TYPE;
+import cn.dmandp.context.SessionContext;
 import cn.dmandp.context.TtApplication;
+import cn.dmandp.entity.TTUser;
 import cn.dmandp.netio.Result;
 
 public class LoginActivity extends Activity implements View.OnClickListener {

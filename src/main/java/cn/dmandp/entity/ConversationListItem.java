@@ -1,4 +1,6 @@
-package cn.dmandp.common;
+package cn.dmandp.entity;
+
+import android.graphics.Bitmap;
 
 /**
  * Created by 萌即正义 on 14/03/2018.
@@ -9,13 +11,13 @@ public class ConversationListItem {
     private String message;
     private String time;
     private String newMessage;
-    private int imageId;
+    private Bitmap image;
 
-    public ConversationListItem(String username, String message, String time, String newMessage, int imageId) {
+    public ConversationListItem(String username, String message, String time, String newMessage, Bitmap image) {
         this.username = username;
         this.message = message;
         this.time = time;
-        this.imageId = imageId;
+        this.image = image;
         this.newMessage = newMessage;
     }
 
@@ -31,8 +33,8 @@ public class ConversationListItem {
         return time;
     }
 
-    public int getImageId() {
-        return imageId;
+    public Bitmap getImage() {
+        return image;
     }
 
     public String getNewMessage() {

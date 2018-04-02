@@ -1,8 +1,10 @@
-package cn.dmandp.common;
+package cn.dmandp.context;
 
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Map;
+
+import cn.dmandp.entity.TTUser;
 
 /**
  * @author 杨泽雄  Email mengxiangzuojia@163.com

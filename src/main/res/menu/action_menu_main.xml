@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_main_add"
+        android:title="添加好友"
+        android:icon="@drawable/ic_person_add_black_36dp" />
+    <item
+        android:id="@+id/menu_main_scan"
+        android:title="扫一扫"
+        android:icon="@drawable/scan" />
+</menu>

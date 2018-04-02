@@ -11,8 +11,8 @@ import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.dmandp.common.ChatMessage;
-import cn.dmandp.common.MessageAdapter;
+import cn.dmandp.adapter.MessageAdapter;
+import cn.dmandp.entity.ChatMessage;
 
 /**
  * Created by 萌即正义 on 15/03/2018.

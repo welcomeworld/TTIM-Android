@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 
-import cn.dmandp.common.SessionContext;
-
 /**
  * Created by 萌即正义 on 27/03/2018.
  */
