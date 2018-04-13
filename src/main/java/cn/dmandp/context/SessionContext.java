@@ -17,7 +17,7 @@ public class SessionContext {
     private Boolean login = false;
     private SocketChannel socketChannel;
     private Map<String, Object> Attributes;
-
+    public String socketChannelErrorMessage;
     public SessionContext(SocketChannel socketChannel) {
         this.socketChannel = socketChannel;
         Attributes = new HashMap<String, Object>();

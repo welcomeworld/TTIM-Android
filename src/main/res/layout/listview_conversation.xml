@@ -48,10 +48,11 @@
 
         <TextView
             android:id="@+id/conversationlistitem_newmessage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="19dp"
+            android:layout_height="19dp"
             android:gravity="center"
-            android:text="提示新消息" />
+            android:background="@drawable/new_message"
+            android:text="99" />
 
     </LinearLayout>
 

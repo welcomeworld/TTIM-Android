@@ -49,5 +49,9 @@ public interface TYPE {
      * 好友信息响应
      */
     static final byte FRIENDS_RESP = 11;
+    /**
+     * 心跳
+     */
+    static final byte HEART = 12;
 }
 

@@ -12,8 +12,10 @@ public class ConversationListItem {
     private String time;
     private String newMessage;
     private Bitmap image;
+    private int uId;
 
-    public ConversationListItem(String username, String message, String time, String newMessage, Bitmap image) {
+    public ConversationListItem(int uId, String username, String message, String time, String newMessage, Bitmap image) {
+        this.uId = uId;
         this.username = username;
         this.message = message;
         this.time = time;
@@ -35,6 +37,10 @@ public class ConversationListItem {
 
     public Bitmap getImage() {
         return image;
+    }
+
+    public int getUId() {
+        return uId;
     }
 
     public String getNewMessage() {

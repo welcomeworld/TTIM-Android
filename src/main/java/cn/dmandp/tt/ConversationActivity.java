@@ -18,7 +18,7 @@ import cn.dmandp.entity.ChatMessage;
  * Created by 萌即正义 on 15/03/2018.
  */
 
-public class ConversationActivity extends Activity implements View.OnClickListener {
+public class ConversationActivity extends BaseActivity implements View.OnClickListener {
     List<ChatMessage> messages = new ArrayList<ChatMessage>();
     EditText messagetext;
     Button send;

@@ -23,7 +23,7 @@ import cn.dmandp.context.TtApplication;
 import cn.dmandp.entity.TTUser;
 import cn.dmandp.netio.Result;
 
-public class LoginActivity extends Activity implements View.OnClickListener {
+public class LoginActivity extends BaseActivity implements View.OnClickListener {
     Button newButton;
     Button forgetButton;
     Button loginButton;
@@ -75,13 +75,17 @@ public class LoginActivity extends Activity implements View.OnClickListener {
             String uPassword = strings[1];
             TtApplication application = (TtApplication) getApplication();
             SessionContext sessionContext = application.getSessionContext();
-            if (sessionContext == null) {
-                Log.i("LoginActivity", "sessionContext is null");
+            SocketChannel socketChannel = sessionContext.getSocketChannel();
+            if (socketChannel == null) {
+                Log.i("LoginActivity", "socketChannel is null");
                 result.setResultStatus((byte) 0);
-                result.setResultBody("sessionContext create fail please check your network!");
+                if (sessionContext.socketChannelErrorMessage != null) {
+                    result.setResultBody(sessionContext.socketChannelErrorMessage);
+                } else {
+                    result.setResultBody("未知错误！");
+                }
                 return result;
             }
-            SocketChannel socketChannel = sessionContext.getSocketChannel();
             try {
                 ByteBuffer byteBuffer = ByteBuffer.allocate(Const.BYTEBUFFER_MAX);
                 ByteBuffer receiveBuffer = ByteBuffer.allocate(Const.BYTEBUFFER_MAX);
@@ -90,19 +94,24 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                 builder.setUId(uId);
                 builder.setUPassword(uPassword);
                 TTUser loginuser = builder.build();
-                byteBuffer.put(loginuser.toByteArray());
+                byte[] body = loginuser.toByteArray();
+                byteBuffer.putInt(body.length);
+                byteBuffer.put(body);
                 byteBuffer.flip();
-                socketChannel.write(byteBuffer);
+                while (byteBuffer.hasRemaining()) {
+                    socketChannel.write(byteBuffer);
+                }
+                Log.e("TTIM-LoginActivity", "socketChannelHashCode" + socketChannel.hashCode());
                 socketChannel.read(receiveBuffer);
                 receiveBuffer.flip();
                 byte[] responsecontent = new byte[receiveBuffer.remaining()];
-                receiveBuffer.get(responsecontent);
-                if (responsecontent[0] == TYPE.LOGIN_RESP) {
-                    if (responsecontent[1] == RESP_CODE.SUCCESS) {
+                if (receiveBuffer.get() == TYPE.LOGIN_RESP) {
+                    int length = receiveBuffer.getInt();
+                    byte code = receiveBuffer.get();
+                    receiveBuffer.get(responsecontent, 0, length - 1);
+                    if (code == RESP_CODE.SUCCESS) {
                         result.setResultStatus((byte) 1);
-                        byte[] returnUserbytes = new byte[responsecontent.length - 2];
-                        System.arraycopy(responsecontent, 2, returnUserbytes, 0, returnUserbytes.length);
-                        TTUser.Builder returnUserBuilder = TTUser.newBuilder(TTUser.parseFrom(returnUserbytes));
+                        TTUser.Builder returnUserBuilder = TTUser.newBuilder(TTUser.parseFrom(responsecontent));
                         returnUserBuilder.setUPassword(loginuser.getUPassword());
                         result.setResultBody(returnUserBuilder.build());
                         return result;
@@ -112,7 +121,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                     return result;
                 } else {
                     result.setResultStatus((byte) 0);
-                    result.setResultBody("未知的服务器响应：" + new String(responsecontent));
+                    result.setResultBody("未知的服务器响应：" + new String(receiveBuffer.array()));
                     return result;
                 }
             } catch (IOException e) {

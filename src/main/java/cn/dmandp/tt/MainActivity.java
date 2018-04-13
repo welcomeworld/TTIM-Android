@@ -13,6 +13,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.view.menu.MenuBuilder;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
@@ -25,13 +26,14 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.dmandp.common.MyDividerItemDecoration;
 import cn.dmandp.entity.ConversationListItem;
 import cn.dmandp.adapter.ConversationListItemAdapter;
 import cn.dmandp.context.SessionContext;
 import cn.dmandp.context.TtApplication;
 import cn.dmandp.netio.Result;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends BaseActivity implements View.OnClickListener {
     private List<ConversationListItem> conversationList = new ArrayList<ConversationListItem>();
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
@@ -119,44 +121,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (photo == null) {
                     Log.e("MainActivity", "do not have file");
                 }
-                ConversationListItem user1 = new ConversationListItem("杨泽雄", "这是测试数据", "22:00", "6", photo);
+                ConversationListItem user1 = new ConversationListItem(1, "test", "test data", "22:00", "99", photo);
                 conversationList.add(user1);
-                ConversationListItem user2 = new ConversationListItem("杨泽雄", "这是测试数据", "22:00", "6", photo);
+                ConversationListItem user2 = new ConversationListItem(1, "test", "test data", "22:00", "99", photo);
                 conversationList.add(user2);
-                ConversationListItem user3 = new ConversationListItem("杨泽雄", "这是测试数据", "22:00", "6", photo);
+                ConversationListItem user3 = new ConversationListItem(1, "test", "test data", "22:00", "99", photo);
                 conversationList.add(user3);
-                ConversationListItem user4 = new ConversationListItem("杨泽雄", "这是测试数据", "22:00", "6", photo);
+                ConversationListItem user4 = new ConversationListItem(1, "test", "test data", "22:00", "99", photo);
                 conversationList.add(user4);
-                ConversationListItem user5 = new ConversationListItem("杨泽雄", "这是测试数据", "22:00", "6", photo);
-                conversationList.add(user5);
-                ConversationListItem user6 = new ConversationListItem("杨泽雄", "这是测试数据", "22:00", "6", photo);
-                conversationList.add(user6);
-                ConversationListItem user7 = new ConversationListItem("杨泽雄", "这是测试数据", "22:00", "6", photo);
-                conversationList.add(user7);
-                ConversationListItem user8 = new ConversationListItem("杨泽雄", "这是测试数据", "22:00", "6", photo);
-                conversationList.add(user8);
-                ConversationListItem user9 = new ConversationListItem("杨泽雄", "这是测试数据", "22:00", "6", photo);
-                conversationList.add(user9);
-                ConversationListItem user10 = new ConversationListItem("杨泽雄", "这是测试数据", "22:00", "6", photo);
-                conversationList.add(user10);
-                ConversationListItem user11 = new ConversationListItem("杨泽雄", "这是测试数据", "22:00", "6", photo);
-                conversationList.add(user11);
-                ConversationListItem user12 = new ConversationListItem("杨泽雄", "这是测试数据", "22:00", "6", photo);
-                conversationList.add(user12);
-                ConversationListItem user13 = new ConversationListItem("杨泽雄", "这是测试数据", "22:00", "6", photo);
-                conversationList.add(user13);
-                ConversationListItem user14 = new ConversationListItem("杨泽雄", "这是测试数据", "22:00", "6", photo);
-                conversationList.add(user14);
-                ConversationListItem user15 = new ConversationListItem("杨泽雄", "这是测试数据", "22:00", "6", photo);
-                conversationList.add(user15);
-                ConversationListItem user16 = new ConversationListItem("杨泽雄", "这是测试数据", "22:00", "6", photo);
-                conversationList.add(user16);
-                ConversationListItem user17 = new ConversationListItem("杨泽雄", "这是测试数据", "22:00", "6", photo);
-                conversationList.add(user17);
                 ConversationListItemAdapter conversationListItemAdapter = new ConversationListItemAdapter(conversationList);
+                conversationListItemAdapter.setOnItemClickListener(new ConversationListItemAdapter.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int uId) {
+                        Intent intent = new Intent(MainActivity.this, ConversationActivity.class);
+                        intent.putExtra("uId", uId);
+                        startActivity(intent);
+                    }
+                });
                 recyclerView.setAdapter(conversationListItemAdapter);
-                //recyclerView.addItemDecoration(new DividerGridItemDecoration(this));
-                //recyclerView.setItemAnimator( new DefaultItemAnimator());
+                recyclerView.addItemDecoration(new MyDividerItemDecoration());
+                recyclerView.setItemAnimator(new DefaultItemAnimator());
+
             }
         }
     }

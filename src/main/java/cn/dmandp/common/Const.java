@@ -5,6 +5,7 @@ package cn.dmandp.common;
  */
 
 public interface Const {
+    public static final String HOST = "119.28.9.43";
     public static final int PORT = 52072;
     public static final int BYTEBUFFER_MAX = 10240;
 

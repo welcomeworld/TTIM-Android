@@ -20,6 +20,11 @@ import cn.dmandp.tt.R;
 
 public class ConversationListItemAdapter extends RecyclerView.Adapter<ConversationListItemAdapter.ViewHolder> {
     ArrayList<ConversationListItem> recycleViewData;
+    private OnItemClickListener onItemClickListener;
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
+    }
 
     public ConversationListItemAdapter(List<ConversationListItem> data) {
         recycleViewData = (ArrayList<ConversationListItem>) data;
@@ -33,12 +38,20 @@ public class ConversationListItemAdapter extends RecyclerView.Adapter<Conversati
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        ConversationListItem currentView = recycleViewData.get(position);
+        final ConversationListItem currentView = recycleViewData.get(position);
         holder.imageView.setImageBitmap(currentView.getImage());
         holder.userTextView.setText(currentView.getUsername());
         holder.messageTextView.setText(currentView.getMessage());
         holder.timeTextView.setText(currentView.getTime());
         holder.newMessageTextView.setText(currentView.getNewMessage());
+        if (onItemClickListener != null) {
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onItemClickListener.onItemClick(view, currentView.getUId());
+                }
+            });
+        }
     }
 
     @Override
@@ -61,5 +74,9 @@ public class ConversationListItemAdapter extends RecyclerView.Adapter<Conversati
             timeTextView = itemView.findViewById(R.id.conversationlistitem_time);
             newMessageTextView = itemView.findViewById(R.id.conversationlistitem_newmessage);
         }
+    }
+
+    public interface OnItemClickListener {
+        public void onItemClick(View view, int uId);
     }
 }

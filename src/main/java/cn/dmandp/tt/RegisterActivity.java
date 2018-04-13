@@ -28,7 +28,7 @@ import cn.dmandp.netio.Result;
  * Created by 萌即正义 on 26/03/2018.
  */
 
-public class RegisterActivity extends Activity implements View.OnClickListener {
+public class RegisterActivity extends BaseActivity implements View.OnClickListener {
     Button newButton;
     Button loginButton;
     EditText accountText;
