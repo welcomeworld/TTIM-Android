@@ -14,33 +14,45 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-
         <activity
             android:name=".LoginActivity"
-            android:launchMode="singleInstance"></activity>
-
+            android:launchMode="singleInstance">
+            <intent-filter>
+                <action android:name="cn.dmandp.tt.action.LOGINACTIVITY" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".MainActivity"
             android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <action android:name="cn.dmandp.tt.action.MAINACTIVITY" />
+
+                <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ConversationActivity"
             android:launchMode="singleInstance">
-
+            <intent-filter>
+                <action android:name="cn.dmandp.tt.action.CONVERSATIONACTIVITY" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
-
         <activity
             android:name=".RegisterActivity"
             android:launchMode="singleInstance">
-
+            <intent-filter>
+                <action android:name="cn.dmandp.tt.action.REGISTERACTIVITY" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
+        <service
+            android:name="cn.dmandp.service.MessageService"
+            android:enabled="true"></service>
     </application>
 
 </manifest>

@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="cn.dmandp.tt.LoginActivity">
-
     <LinearLayout
         android:id="@+id/login_top_layout"
         android:layout_width="match_parent"
@@ -81,6 +80,14 @@
             android:textColor="#1C86EE"
             android:background="#00000000" />
     </RelativeLayout>
+
+    <cn.dmandp.view.LoadView
+        android:id="@+id/login_loadview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="#00000000"
+        android:visibility="gone" />
 
 
 </RelativeLayout>

@@ -1,5 +1,7 @@
 package cn.dmandp.context;
 
+import android.app.Activity;
+
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +14,7 @@ import cn.dmandp.entity.TTUser;
  * @date 18 Mar 2018 20:42:06
  */
 public class SessionContext {
+    public static Map<String, Activity> activities = new HashMap<String, Activity>();
     private TTUser bindUser;
     private Integer uID;
     private Boolean login = false;

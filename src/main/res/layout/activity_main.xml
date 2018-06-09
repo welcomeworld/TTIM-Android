@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="cn.dmandp.tt.MainActivity">
-
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -26,9 +25,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="120dp"
                     android:src="@drawable/navigation_background"
+                    android:contentDescription="@string/app_name"
                     app:layout_collapseMode="parallax"
                     app:layout_collapseParallaxMultiplier="0.6" />
-
                 <android.support.v7.widget.Toolbar
                     android:id="@+id/main_toolbar"
                     android:layout_width="match_parent"
@@ -36,15 +35,6 @@
                     app:theme="@style/main_toolbar"
                     app:layout_collapseMode="pin"
                     app:popupTheme="@style/main_toolbar_popup">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="消息"
-                        android:layout_centerInParent="true"
-                        android:layout_gravity="center"
-                        android:gravity="center"
-                        android:textSize="18sp"
-                        android:textColor="@color/white" />
                 </android.support.v7.widget.Toolbar>
             </android.support.design.widget.CollapsingToolbarLayout>
         </android.support.design.widget.AppBarLayout>
@@ -56,7 +46,6 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior"></android.support.v7.widget.RecyclerView>
 
     </android.support.design.widget.CoordinatorLayout>
-    >
 
     <android.support.design.widget.NavigationView
         android:id="@+id/main_navigation"
@@ -67,4 +56,12 @@
         app:itemBackground="@color/white"
         app:headerLayout="@layout/navigation_header_main"
         app:menu="@menu/navigation_menu_main"></android.support.design.widget.NavigationView>
+
+    <cn.dmandp.view.LoadView
+        android:id="@+id/main_loadview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="#00000000"
+        android:visibility="gone" />
 </android.support.v4.widget.DrawerLayout>

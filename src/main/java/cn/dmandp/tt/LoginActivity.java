@@ -5,10 +5,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -22,6 +24,7 @@ import cn.dmandp.context.SessionContext;
 import cn.dmandp.context.TtApplication;
 import cn.dmandp.entity.TTUser;
 import cn.dmandp.netio.Result;
+import cn.dmandp.view.LoadView;
 
 public class LoginActivity extends BaseActivity implements View.OnClickListener {
     Button newButton;
@@ -29,12 +32,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     Button loginButton;
     EditText accountText;
     EditText passwordText;
+    public LoadView loadView;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        //View initialization
         loginButton = findViewById(R.id.login_login_button);
         loginButton.setOnClickListener(this);
         newButton = findViewById(R.id.login_new_user_button);
@@ -43,15 +48,43 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         forgetButton.setOnClickListener(this);
         accountText = findViewById(R.id.login_account_edittext);
         passwordText = findViewById(R.id.login_password_edittext);
+        loadView = findViewById(R.id.login_loadview);
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            //start loginTask
             case R.id.login_login_button:
                 new LoginTask().execute(accountText.getText().toString(), passwordText.getText().toString());
                 break;
+            //go to register
             case R.id.login_new_user_button:
                 Intent intent = new Intent(this, RegisterActivity.class);
                 startActivity(intent);
@@ -62,9 +95,16 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
     class LoginTask extends AsyncTask<String, String, Result> {
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            loadView.setVisibility(View.VISIBLE);
+        }
+
+        @Override
         protected Result doInBackground(String... strings) {
             Result result = new Result();
             int uId;
+            //parse uid to integer
             try {
                 uId = Integer.parseInt(strings[0]);
             } catch (Exception e) {
@@ -76,6 +116,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             TtApplication application = (TtApplication) getApplication();
             SessionContext sessionContext = application.getSessionContext();
             SocketChannel socketChannel = sessionContext.getSocketChannel();
+            //socketChannel is null so return error message
             if (socketChannel == null) {
                 Log.i("LoginActivity", "socketChannel is null");
                 result.setResultStatus((byte) 0);
@@ -87,8 +128,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 return result;
             }
             try {
-                ByteBuffer byteBuffer = ByteBuffer.allocate(Const.BYTEBUFFER_MAX);
-                ByteBuffer receiveBuffer = ByteBuffer.allocate(Const.BYTEBUFFER_MAX);
+
+                ByteBuffer byteBuffer = ByteBuffer.allocate(514);
                 byteBuffer.put(TYPE.LOGIN_REQ);
                 TTUser.Builder builder = TTUser.newBuilder();
                 builder.setUId(uId);
@@ -98,32 +139,20 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 byteBuffer.putInt(body.length);
                 byteBuffer.put(body);
                 byteBuffer.flip();
+                //send login request to server
                 while (byteBuffer.hasRemaining()) {
                     socketChannel.write(byteBuffer);
                 }
-                Log.e("TTIM-LoginActivity", "socketChannelHashCode" + socketChannel.hashCode());
-                socketChannel.read(receiveBuffer);
-                receiveBuffer.flip();
-                byte[] responsecontent = new byte[receiveBuffer.remaining()];
-                if (receiveBuffer.get() == TYPE.LOGIN_RESP) {
-                    int length = receiveBuffer.getInt();
-                    byte code = receiveBuffer.get();
-                    receiveBuffer.get(responsecontent, 0, length - 1);
-                    if (code == RESP_CODE.SUCCESS) {
-                        result.setResultStatus((byte) 1);
-                        TTUser.Builder returnUserBuilder = TTUser.newBuilder(TTUser.parseFrom(responsecontent));
-                        returnUserBuilder.setUPassword(loginuser.getUPassword());
-                        result.setResultBody(returnUserBuilder.build());
-                        return result;
-                    }
-                    result.setResultStatus((byte) 0);
-                    result.setResultBody(new String(responsecontent, 2, responsecontent.length - 2));
-                    return result;
-                } else {
-                    result.setResultStatus((byte) 0);
-                    result.setResultBody("未知的服务器响应：" + new String(receiveBuffer.array()));
-                    return result;
+                //save password temporary
+                sessionContext.setAttribute("loginpassword", uPassword);
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
+                result.setResultStatus((byte) 1);
+                result.setResultBody("服务器响应超时！");
+                return result;
             } catch (IOException e) {
                 result.setResultStatus((byte) 0);
                 Log.e("LoginActivity", e.getMessage());
@@ -135,20 +164,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         @Override
         protected void onPostExecute(Result result) {
             if (result.getResultStatus() == 1) {
-                TTUser currentUser = (TTUser) result.getResultBody();
-                SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
-                editor.putInt("currentUserId", currentUser.getUId());
-                editor.putString("currentUserPassword", currentUser.getUPassword());
-                editor.commit();
-                SessionContext sessionContext = ((TtApplication) getApplication()).getSessionContext();
-                sessionContext.setLogin(true);
-                sessionContext.setuID(currentUser.getUId());
-                sessionContext.setBindUser(currentUser);
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
+                //if loadView is still Visibility,the login failed
+                if (loadView.getVisibility() == View.VISIBLE) {
+                    Toast.makeText(LoginActivity.this, (String) result.getResultBody(), Toast.LENGTH_SHORT).show();
+                    loadView.setVisibility(View.GONE);
+                }
             } else {
                 Toast.makeText(LoginActivity.this, (String) result.getResultBody(), Toast.LENGTH_SHORT).show();
+                loadView.setVisibility(View.GONE);
             }
         }
     }

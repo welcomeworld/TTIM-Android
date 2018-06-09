@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer-array name="splash_circle_colors">
+        <item>@color/colorAccent</item>
+        <item>@color/colorPrimary</item>
+        <item>@color/colorLogin</item>
+        <item>@color/colorAccent</item>
+        <item>@color/colorPrimary</item>
+        <item>@color/colorLogin</item>
+    </integer-array>
+</resources>
