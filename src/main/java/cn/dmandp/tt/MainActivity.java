@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2018. welcomeworld All rights reserved
+ */
+
 package cn.dmandp.tt;
 
 import android.annotation.SuppressLint;
@@ -9,7 +13,9 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.os.Bundle;
@@ -22,7 +28,10 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -48,11 +57,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
     private RecyclerView recyclerView;
+    private CoordinatorLayout coordinatorLayout;
     LoadView loadView;
 
     @SuppressLint("RestrictedApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        String uName = "未登录";
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //start service
@@ -60,9 +71,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         startService(intent);
         //Login verify
         sessionContext = ((TtApplication) getApplication()).getSessionContext();
+        SharedPreferences data = getSharedPreferences("data", MODE_PRIVATE);
+        int currentUserId = data.getInt("currentUserId", -1);
+        uName = data.getString("currentUserName", "未登录");
         if (!sessionContext.isLogin()) {
-            SharedPreferences data = getSharedPreferences("data", MODE_PRIVATE);
-            int currentUserId = data.getInt("currentUserId", -1);
             if (currentUserId == -1) {
                 //SharedPreferences save nothing so go to LoginActivity
                 intent = new Intent(MainActivity.this, LoginActivity.class);
@@ -76,6 +88,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             }
         }
         //View initialization
+        coordinatorLayout = findViewById(R.id.main_coordinatorLayout);
         loadView = findViewById(R.id.main_loadview);
 
         drawerLayout = findViewById(R.id.main_drawerlayout);
@@ -108,23 +121,32 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         //drawerLayout associate with toolbar
         drawerToggle.syncState();
         //-----NavigationView initialization start
-        NavigationView navigationView = findViewById(R.id.main_navigation);
+        final NavigationView navigationView = findViewById(R.id.main_navigation);
         //set itemIcon color
         navigationView.setItemIconTintList(null);
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
+                    case R.id.navigation_menu_item_copyright:
+                        Snackbar.make(coordinatorLayout, R.string.copyRight, Snackbar.LENGTH_LONG).show();
+                        break;
                     case R.id.navigation_menu_item_about:
                         break;
                     case R.id.navigation_menu_item_logout:
                         Intent logoutIntent = new Intent(MainActivity.this, LoginActivity.class);
                         TtApplication application = (TtApplication) getApplication();
                         SessionContext sessionContext = application.getSessionContext();
+                        //remove currentUserId currentUserPassword and currentUserName from SharedPreferences
+                        SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
+                        editor.remove("currentUserId");
+                        editor.remove("currentUserPassword");
+                        editor.remove("currentUserName");
+                        editor.commit();
                         sessionContext.setLogin(false);
                         try {
                             sessionContext.getSocketChannel().close();
-                        } catch (IOException e) {
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                         sessionContext.setSocketChannel(null);
@@ -137,7 +159,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 return false;
             }
         });
-        navigationView.getHeaderView(R.id.navigation_name_header);
+        View headerView = navigationView.inflateHeaderView(R.layout.navigation_header_main);
+        TextView nameText = headerView.findViewById(R.id.navigation_name_header);
+        nameText.setText(uName);
         //-----NavigationView initialization end
         //recyclerView initialization
         recyclerView = findViewById(R.id.main_recyclerview);

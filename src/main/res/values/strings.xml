@@ -2,4 +2,11 @@
     <string name="app_name">TTIM</string>
     <string name="openDrawer">打开侧边栏</string>
     <string name="closeDrawer">关闭侧边栏</string>
+    <string name="unLogin">未登录</string>
+    <string name="copyRightItem">版权声明</string>
+    <string name="logout">退出登录</string>
+    <string name="aboutMe">关于我</string>
+    <string name="setting">设置</string>
+    <string name="favorite">收藏</string>
+    <string name="copyRight">Copyright (c) 2018. welcomeworld All rights reserved</string>
 </resources>

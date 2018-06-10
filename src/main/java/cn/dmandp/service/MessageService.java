@@ -221,6 +221,7 @@ public class MessageService extends Service {
                         SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
                         editor.putInt("currentUserId", currentUser.getUId());
                         editor.putString("currentUserPassword", currentUser.getUPassword());
+                        editor.putString("currentUserName", currentUser.getUName());
                         editor.commit();
                         //save login status(id and user bean) in sessionContext
                         sessionContext.setLogin(true);

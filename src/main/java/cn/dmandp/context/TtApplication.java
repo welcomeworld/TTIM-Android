@@ -17,7 +17,7 @@ import cn.dmandp.entity.TTUser;
  */
 
 public class TtApplication extends Application {
-    SessionContext sessionContext;
+    static SessionContext sessionContext = new SessionContext(null);
 
     @Override
     public void onCreate() {
@@ -40,7 +40,7 @@ public class TtApplication extends Application {
                     Log.e("TTIM-TtApplication", ErrorTips.unresolvedAddressExceptionMessage);
                     error = ErrorTips.unresolvedAddressExceptionMessage;
                 }
-                sessionContext = new SessionContext(socketChannel);
+                sessionContext.setSocketChannel(socketChannel);
                 sessionContext.socketChannelErrorMessage = error;
                 while (true) {
                     try {
@@ -104,6 +104,11 @@ public class TtApplication extends Application {
                                 e1.printStackTrace();
                             }
                         }
+                        try {
+                            socketChannel.close();
+                        } catch (Exception e1) {
+                            e1.printStackTrace();
+                        }
                         sessionContext.setSocketChannel(null);
                         Log.e("TTIM-TtApplication", e.getMessage());
                         Log.i("TTIM-TtApplication", "Reconnecting!");
@@ -112,7 +117,8 @@ public class TtApplication extends Application {
             }
         }).start();
     }
-    public SessionContext getSessionContext() {
+
+    static public SessionContext getSessionContext() {
         return sessionContext;
     }
 }
