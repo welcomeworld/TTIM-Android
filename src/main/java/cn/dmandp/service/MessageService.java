@@ -63,7 +63,6 @@ public class MessageService extends Service {
                 @Override
                 public void run() {
                     SessionContext sessionContext = ((TtApplication) getApplication()).getSessionContext();
-                    SocketChannel socketChannel = sessionContext.getSocketChannel();
                     //Response type List
                     List<Byte> TYPES = new ArrayList<Byte>();
                     TYPES.add(TYPE.LOGIN_RESP);
@@ -76,16 +75,17 @@ public class MessageService extends Service {
                     while (true) {
                         int readnum = 0;
                         try {
+                            Log.e("TTIM-MessageService", "before read");
+                            SocketChannel socketChannel = sessionContext.getSocketChannel();
                             readnum = socketChannel.read(byteBuffer);
+                            Log.e("TTIM-MessageService", "after read");
                         } catch (Exception e) {
                             try {
-                                Thread.sleep(1000);
+                                Thread.sleep(50);
                             } catch (InterruptedException e1) {
                                 e1.printStackTrace();
                             }
                             e.printStackTrace();
-                            //retry
-                            socketChannel = sessionContext.getSocketChannel();
                             continue;
                         }
                         if (readnum > 0) {
@@ -165,6 +165,7 @@ public class MessageService extends Service {
                     SessionContext sessionContext = ((TtApplication) getApplication()).getSessionContext();
                     //have been login so do nothing
                     if (sessionContext.isLogin()) {
+                        Log.e("TTIM-MessageService", "User have been login");
                         break;
                     }
 
@@ -188,6 +189,7 @@ public class MessageService extends Service {
                             SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
                             editor.putInt("currentUserId", currentUser.getUId());
                             editor.putString("currentUserPassword", currentUser.getUPassword());
+                            editor.putString("currentUserName", currentUser.getUName());
                             editor.commit();
                             //save login status(id and user bean) in sessionContext
                             sessionContext.setLogin(true);

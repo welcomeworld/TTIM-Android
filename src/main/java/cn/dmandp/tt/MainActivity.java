@@ -1,6 +1,7 @@
 package cn.dmandp.tt;
 
 import android.annotation.SuppressLint;
+import android.app.Application;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -117,12 +118,26 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     case R.id.navigation_menu_item_about:
                         break;
                     case R.id.navigation_menu_item_logout:
-                        Toast.makeText(MainActivity.this, "your click the " + item.getTitle(), Toast.LENGTH_SHORT).show();
+                        Intent logoutIntent = new Intent(MainActivity.this, LoginActivity.class);
+                        TtApplication application = (TtApplication) getApplication();
+                        SessionContext sessionContext = application.getSessionContext();
+                        sessionContext.setLogin(false);
+                        try {
+                            sessionContext.getSocketChannel().close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        sessionContext.setSocketChannel(null);
+                        sessionContext.setuID(null);
+                        sessionContext.setBindUser(null);
+                        startActivity(logoutIntent);
+                        finish();
                         break;
                 }
                 return false;
             }
         });
+        navigationView.getHeaderView(R.id.navigation_name_header);
         //-----NavigationView initialization end
         //recyclerView initialization
         recyclerView = findViewById(R.id.main_recyclerview);

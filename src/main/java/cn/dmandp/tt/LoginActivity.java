@@ -16,6 +16,7 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.Executors;
 
 import cn.dmandp.common.Const;
 import cn.dmandp.common.RESP_CODE;
@@ -82,7 +83,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         switch (v.getId()) {
             //start loginTask
             case R.id.login_login_button:
-                new LoginTask().execute(accountText.getText().toString(), passwordText.getText().toString());
+                new LoginTask().executeOnExecutor(Executors.newCachedThreadPool(), accountText.getText().toString(), passwordText.getText().toString());
                 break;
             //go to register
             case R.id.login_new_user_button:

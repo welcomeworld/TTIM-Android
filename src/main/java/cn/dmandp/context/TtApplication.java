@@ -55,6 +55,7 @@ public class TtApplication extends Application {
                         while (flag) {
                             try {
                                 socketChannel = SocketChannel.open(new InetSocketAddress(Const.HOST, Const.PORT));
+                                Log.e("TTIM-TtApplication", "reconnect" + socketChannel.hashCode());
                                 sessionContext.setSocketChannel(socketChannel);
                                 //if have been login,login directly after reconnect
                                 if (sessionContext.isLogin()) {
