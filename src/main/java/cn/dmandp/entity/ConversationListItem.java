@@ -23,6 +23,34 @@ public class ConversationListItem {
         this.newMessage = newMessage;
     }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public void setNewMessage(String newMessage) {
+        this.newMessage = newMessage;
+    }
+
+    public void setImage(Bitmap image) {
+        this.image = image;
+    }
+
+    public int getuId() {
+        return uId;
+    }
+
+    public void setuId(int uId) {
+        this.uId = uId;
+    }
+
     public String getUsername() {
         return username;
     }

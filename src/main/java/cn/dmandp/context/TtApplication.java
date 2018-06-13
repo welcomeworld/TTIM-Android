@@ -10,7 +10,9 @@ import java.nio.channels.UnresolvedAddressException;
 import cn.dmandp.common.Const;
 import cn.dmandp.common.ErrorTips;
 import cn.dmandp.common.TYPE;
+import cn.dmandp.entity.TTIMPacket;
 import cn.dmandp.entity.TTUser;
+import cn.dmandp.netio.SendThread;
 
 /**
  * Created by 萌即正义 on 27/03/2018.
@@ -121,4 +123,10 @@ public class TtApplication extends Application {
     static public SessionContext getSessionContext() {
         return sessionContext;
     }
+
+    static public void send(TTIMPacket packet) {
+        new SendThread(packet).start();
+    }
+
+    ;
 }

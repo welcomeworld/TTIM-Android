@@ -8,6 +8,8 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -36,11 +38,14 @@ import org.w3c.dom.Text;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import cn.dmandp.common.MyDividerItemDecoration;
 import cn.dmandp.common.TYPE;
+import cn.dmandp.dao.TTIMDaoHelper;
 import cn.dmandp.entity.ConversationListItem;
 import cn.dmandp.adapter.ConversationListItemAdapter;
 import cn.dmandp.context.SessionContext;
@@ -52,7 +57,20 @@ import cn.dmandp.view.LoadView;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener {
     private SessionContext sessionContext;
+    private TTIMDaoHelper daoHelper = new TTIMDaoHelper(this);
+    private SQLiteDatabase database;
+
+    public List<ConversationListItem> getConversationList() {
+        return conversationList;
+    }
+
     private List<ConversationListItem> conversationList = new ArrayList<ConversationListItem>();
+
+    public ConversationListItemAdapter getConversationListItemAdapter() {
+        return conversationListItemAdapter;
+    }
+
+    private ConversationListItemAdapter conversationListItemAdapter;
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
@@ -63,6 +81,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @SuppressLint("RestrictedApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        database = daoHelper.getReadableDatabase();
         String uName = "未登录";
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -91,7 +110,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         coordinatorLayout = findViewById(R.id.main_coordinatorLayout);
         loadView = findViewById(R.id.main_loadview);
 
-        drawerLayout = findViewById(R.id.main_drawerlayout);
+        drawerLayout = findViewById(R.id.main_drawerLayout);
         //------toolbar initialization start
         toolbar = findViewById(R.id.main_toolbar);
         toolbar.inflateMenu(R.menu.action_menu_main);
@@ -129,7 +148,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.navigation_menu_item_copyright:
-                        Snackbar.make(coordinatorLayout, R.string.copyRight, Snackbar.LENGTH_LONG).show();
+                        Snackbar.make(navigationView, R.string.copyRight, Snackbar.LENGTH_LONG).show();
                         break;
                     case R.id.navigation_menu_item_about:
                         break;
@@ -168,19 +187,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(MainActivity.this);
         recyclerView.setLayoutManager(linearLayoutManager);
         linearLayoutManager.setOrientation(OrientationHelper.VERTICAL);
-        Bitmap photo = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory() + "/photo.png");
-        if (photo == null) {
-            Log.e("MainActivity", "do not have file");
-        }
-        ConversationListItem user1 = new ConversationListItem(1, "test", "test data", "22:00", "99", photo);
-        conversationList.add(user1);
-        ConversationListItem user2 = new ConversationListItem(1, "test", "test data", "22:00", "99", photo);
-        conversationList.add(user2);
-        ConversationListItem user3 = new ConversationListItem(1, "test", "test data", "22:00", "99", photo);
-        conversationList.add(user3);
-        ConversationListItem user4 = new ConversationListItem(1, "test", "test data", "22:00", "99", photo);
-        conversationList.add(user4);
-        ConversationListItemAdapter conversationListItemAdapter = new ConversationListItemAdapter(conversationList);
+        dataInit();
+        conversationListItemAdapter = new ConversationListItemAdapter(conversationList);
         conversationListItemAdapter.setOnItemClickListener(new ConversationListItemAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int uId) {
@@ -259,7 +267,29 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     public void dataInit() {
-
+        Log.e("MainActivity", "dataInit");
+        SharedPreferences currentUserPreferences = getSharedPreferences("data", MODE_PRIVATE);
+        int currentUserId = currentUserPreferences.getInt("currentUserId", -1);
+        SharedPreferences messagePreferences = getSharedPreferences("message", MODE_PRIVATE);
+        Cursor cursor = database.rawQuery("select * from friends where uid=?", new String[]{currentUserId + ""});
+        while (cursor.moveToNext()) {
+            Log.e("MainActivity", "have friends");
+            int friendid = cursor.getInt(cursor.getColumnIndex("friendid"));
+            int messagecount = messagePreferences.getInt(friendid + ":" + currentUserId, -1);
+            String uname = cursor.getString(cursor.getColumnIndex("Uname"));
+            Cursor message = database.rawQuery("select * from messages where Fromid=? and Toid=? order by Mtime desc limit 1", new String[]{friendid + "", currentUserId + ""});
+            if (messagecount != -1 && message.moveToNext()) {
+                Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + friendid + ".png");
+                if (photo == null) {
+                    photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                    Log.e("MainActivity", "do not have file" + friendid + ".png");
+                }
+                SimpleDateFormat format = new SimpleDateFormat("HH:MM");
+                String mcontent = message.getString(message.getColumnIndex("mcontent"));
+                Long mtime = message.getLong(message.getColumnIndex("Mtime"));
+                conversationList.add(new ConversationListItem(friendid, uname, mcontent, format.format(new Date(mtime)), messagecount + "", photo));
+            }
+        }
     }
 
 }

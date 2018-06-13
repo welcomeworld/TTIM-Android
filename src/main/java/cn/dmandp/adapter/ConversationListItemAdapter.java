@@ -44,6 +44,11 @@ public class ConversationListItemAdapter extends RecyclerView.Adapter<Conversati
         holder.messageTextView.setText(currentView.getMessage());
         holder.timeTextView.setText(currentView.getTime());
         holder.newMessageTextView.setText(currentView.getNewMessage());
+        if (Integer.parseInt(currentView.getNewMessage()) < 1) {
+            holder.newMessageTextView.setVisibility(View.GONE);
+        } else {
+            holder.newMessageTextView.setVisibility(View.VISIBLE);
+        }
         if (onItemClickListener != null) {
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

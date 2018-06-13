@@ -53,5 +53,13 @@ public interface TYPE {
      * 心跳
      */
     static final byte HEART = 12;
+    /**
+     * user info update req
+     */
+    static final byte USERINFO_REQ = 13;
+    /**
+     * user info update resp
+     */
+    static final byte USERINFO_RESP = 14;
 }
 

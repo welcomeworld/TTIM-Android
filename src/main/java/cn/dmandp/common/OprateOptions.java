@@ -6,6 +6,8 @@ package cn.dmandp.common;
  * @date 26 Mar 2018 10:29:54
  */
 public class OprateOptions {
-    public static final int ASK = 0;
-    public static final int ANSWER = 1;
+    public static final byte ASK = 0;
+    public static final byte ANSWER = 1;
+    public static final byte GET = 2;
+    public static final byte UPDATE = 3;
 }
