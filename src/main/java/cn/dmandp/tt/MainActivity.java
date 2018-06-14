@@ -59,6 +59,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private SessionContext sessionContext;
     private TTIMDaoHelper daoHelper = new TTIMDaoHelper(this);
     private SQLiteDatabase database;
+    private int currentUserId;
 
     public List<ConversationListItem> getConversationList() {
         return conversationList;
@@ -91,7 +92,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         //Login verify
         sessionContext = ((TtApplication) getApplication()).getSessionContext();
         SharedPreferences data = getSharedPreferences("data", MODE_PRIVATE);
-        int currentUserId = data.getInt("currentUserId", -1);
+        currentUserId = data.getInt("currentUserId", -1);
         uName = data.getString("currentUserName", "未登录");
         if (!sessionContext.isLogin()) {
             if (currentUserId == -1) {
@@ -195,6 +196,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 Intent intent = new Intent(MainActivity.this, ConversationActivity.class);
                 intent.putExtra("uId", uId);
                 startActivity(intent);
+                SharedPreferences messageSharedPreferences = getSharedPreferences("message", MODE_PRIVATE);
+                SharedPreferences.Editor editor = messageSharedPreferences.edit();
+                int messageCount = messageSharedPreferences.getInt(uId + ":" + currentUserId, 0);
+                if (messageCount != 0) {
+                    for (ConversationListItem item : conversationList) {
+                        if (item.getUId() == uId) {
+                            item.setNewMessage("0");
+                            conversationListItemAdapter.notifyItemChanged(conversationList.indexOf(item));
+                            break;
+                        }
+                    }
+                    editor.putInt(uId + ":" + currentUserId, 0);
+                    editor.commit();
+                }
             }
         });
         recyclerView.setAdapter(conversationListItemAdapter);

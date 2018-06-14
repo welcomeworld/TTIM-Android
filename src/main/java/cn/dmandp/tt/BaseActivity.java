@@ -12,6 +12,7 @@ import cn.dmandp.context.SessionContext;
  */
 
 public class BaseActivity extends AppCompatActivity {
+    String TAG = "BaseActivity";
     private boolean foreground = false;
 
     public boolean isForeground() {
@@ -21,6 +22,7 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        TAG = getClass().getSimpleName();
         Log.d("BaseActivity", getClass().getSimpleName());
         SessionContext.activities.put(getClass().getSimpleName(), this);
         ActivityCollector.addActivity(this);

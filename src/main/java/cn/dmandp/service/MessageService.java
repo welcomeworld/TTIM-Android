@@ -100,73 +100,72 @@ public class MessageService extends Service {
                     TYPES.add(TYPE.SEND_RESP);
                     TYPES.add(TYPE.HEART);
                     TYPES.add(TYPE.USERINFO_RESP);
+                    // reading  data from server
                     while (true) {
                         int readnum = 0;
+                        SocketChannel socketChannel = sessionContext.getSocketChannel();
                         try {
-                            Log.e("TTIM-MessageService", "before read");
-                            SocketChannel socketChannel = sessionContext.getSocketChannel();
                             readnum = socketChannel.read(byteBuffer);
                             Log.e("TTIM-MessageService", "after read");
                         } catch (Exception e) {
+                            e.printStackTrace();
                             try {
-                                Thread.sleep(50);
-                            } catch (InterruptedException e1) {
+                                socketChannel.close();
+                            } catch (Exception e1) {
                                 e1.printStackTrace();
                             }
-                            e.printStackTrace();
+                            continue;
+                        }
+                        if (readnum == -1) {
+                            try {
+                                socketChannel.close();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                             continue;
                         }
                         if (readnum > 0) {
                             byteBuffer.flip();
-                            byte type = byteBuffer.get();
-                            //the message type is not what we want
-                            while (byteBuffer.hasRemaining() && !TYPES.contains(type)) {
-                                type = byteBuffer.get();
-                            }
-
-                            if (byteBuffer.remaining() < 4) {
-                                if (TYPES.contains(type)) {
-                                    byteBuffer.position(byteBuffer.position() - 1);
-                                    byteBuffer.compact();
-                                } else {
-                                    byteBuffer.clear();
+                            while (byteBuffer.hasRemaining()) {
+                                byte type = byteBuffer.get();
+                                //the message type is not what we want
+                                while (byteBuffer.hasRemaining() && !TYPES.contains(type)) {
+                                    Log.e(TAG, "舍弃" + type);
+                                    type = byteBuffer.get();
                                 }
-                                continue;
-                            } else {
-                                int length = byteBuffer.getInt();
-
-                                if (length <= byteBuffer.remaining() && length > 0) {
-                                    //all fit then send to handle
-                                    Log.i("TTIM-MessageService", "package success to handle");
-                                    byte[] dst = new byte[length];
-                                    byteBuffer.get(dst);
-                                    byteBuffer.compact();
-                                    Message msg = Message.obtain();
-                                    Bundle bundle = new Bundle();
-                                    bundle.putByteArray("body", dst);
-                                    msg.setData(bundle);
-                                    msg.what = type;
-                                    handler.sendMessage(msg);
-                                    continue;
-                                } else if (length > byteBuffer.remaining() && length < Const.BYTEBUFFER_MAX - 5) {
-                                    //length over remaining but is ok
-                                    byteBuffer.position(byteBuffer.position() - 5);
-                                    byteBuffer.compact();
-                                    continue;
+                                if (byteBuffer.remaining() < 4) {
+                                    if (TYPES.contains(type)) {
+                                        byteBuffer.position(byteBuffer.position() - 1);
+                                        byteBuffer.compact();
+                                    }
+                                    break;
                                 } else {
-                                    //length illegal
-                                    byteBuffer.compact();
-                                    continue;
+                                    int length = byteBuffer.getInt();
+                                    if (length <= byteBuffer.remaining() && length > 0) {
+                                        //all fit then send to handle
+                                        Log.e(TAG, "package start to handle" + type);
+                                        byte[] dst = new byte[length];
+                                        byteBuffer.get(dst);
+                                        Message msg = Message.obtain();
+                                        Bundle bundle = new Bundle();
+                                        bundle.putByteArray("body", dst);
+                                        msg.setData(bundle);
+                                        msg.what = type;
+                                        handler.sendMessage(msg);
+                                        continue;
+                                    } else if (length > byteBuffer.remaining() && length < Const.BYTEBUFFER_MAX - 5) {
+                                        //length over remaining but is ok
+                                        byteBuffer.position(byteBuffer.position() - 5);
+                                        byteBuffer.compact();
+                                        break;
+                                    }
                                 }
                             }
-                        } else {
-                            //no new message so thread sleep;
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
+                            if (!byteBuffer.hasRemaining()) {
+                                byteBuffer.clear();
                             }
                         }
+                        Log.e(TAG, "num=" + readnum);
                     }
                 }
             }).start();
@@ -190,7 +189,7 @@ public class MessageService extends Service {
             Bundle bundle = msg.getData();
             byte[] body = bundle.getByteArray("body");
             switch (msg.what) {
-                //Login
+                //Login -----start
                 case TYPE.LOGIN_RESP:
                     byte[] user = new byte[body.length - 1];
                     System.arraycopy(body, 1, user, 0, user.length);
@@ -297,21 +296,25 @@ public class MessageService extends Service {
                         sessionContext.setLogin(true);
                         sessionContext.setuID(currentUser.getUId());
                         sessionContext.setBindUser(currentUser);
+                        //go to MainActivity
+                        loginActivity.startActivity(intent);
+                        loginActivity.loadView.setVisibility(View.GONE);
+                        loginActivity.finish();
                         TTIMPacket packet = new TTIMPacket();
                         packet.setTYPE(TYPE.RECEIVE_REQ);
                         byte[] receivebody = {1};
                         packet.setBodylength(receivebody.length);
                         packet.setBody(receivebody);
                         TtApplication.send(packet);
-                        //go to MainActivity
-                        loginActivity.startActivity(intent);
-                        loginActivity.loadView.setVisibility(View.GONE);
-                        loginActivity.finish();
                     }
                     break;
-                //receive message
+                //Login ------end
+
+                //receive message-----start
                 case TYPE.RECEIVE_RESP:
+                    Log.e(TAG, "RECEIVEing");
                     if (!sessionContext.isLogin()) {
+                        Log.e(TAG, "not Login");
                         break;
                     }
                     if (body[0] == RESP_CODE.SUCCESS) {
@@ -323,7 +326,7 @@ public class MessageService extends Service {
                             try {
                                 database.execSQL("insert into messages values(?,?,?,?);", new Object[]{message.getMContent(), message.getMTime(), message.getMFromId(), message.getMToId()});
                             } catch (SQLiteConstraintException e) {
-                                return;
+                                Log.e(TAG, e.getMessage());
                             }
                             if (mainActivity != null && mainActivity.isForeground()) {
                                 ConversationListItemAdapter conversationListItemAdapter = mainActivity.getConversationListItemAdapter();
@@ -352,26 +355,35 @@ public class MessageService extends Service {
                                     return;
                                 }
                                 //in message list now
+                                boolean flag = true;
                                 for (int i = 0; i < conversationList.size(); i++) {
                                     if (conversationList.get(i).getUId() == message.getMFromId()) {
-                                        conversationList.get(i).getNewMessage();
                                         conversationList.get(i).setNewMessage(messageCount + 1 + "");
                                         conversationListItemAdapter.notifyItemChanged(i);
+                                        flag = false;
                                         break;
                                     }
+                                }
+                                if (flag) {
+                                    Log.e(TAG, "信息没有加入列表");
                                 }
                                 return;
                             }
                             //is chatting
                             if (conversationActivity != null && conversationActivity.isForeground()) {
+                                Log.e(TAG, "get message" + message.getMContent());
                                 return;
                             }
                             //app in background
+                            Log.e(TAG, "app in background get message" + message.getMContent());
                         } catch (InvalidProtocolBufferException e) {
                             e.printStackTrace();
                         }
                     }
                     break;
+                //receive message-----end
+
+                //userInfo start
                 case TYPE.USERINFO_RESP:
                     Log.e(TAG, "user_info");
                     if (body[0] == RESP_CODE.SUCCESS) {
@@ -387,6 +399,7 @@ public class MessageService extends Service {
                         }
                     }
                     break;
+                //userInfo end
             }
         }
     }

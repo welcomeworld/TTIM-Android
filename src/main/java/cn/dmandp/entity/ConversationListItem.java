@@ -43,14 +43,6 @@ public class ConversationListItem {
         this.image = image;
     }
 
-    public int getuId() {
-        return uId;
-    }
-
-    public void setuId(int uId) {
-        this.uId = uId;
-    }
-
     public String getUsername() {
         return username;
     }

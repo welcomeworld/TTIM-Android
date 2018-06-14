@@ -19,6 +19,7 @@ import cn.dmandp.netio.SendThread;
  */
 
 public class TtApplication extends Application {
+    private static String TAG = "TTIM-TtApplication";
     static SessionContext sessionContext = new SessionContext(null);
 
     @Override
@@ -30,25 +31,60 @@ public class TtApplication extends Application {
                 Log.i("TTIM-TtApplication", "networkService has run");
                 SocketChannel socketChannel = null;
                 String error = null;
+                //open socketChannel
                 try {
                     socketChannel = SocketChannel.open(new InetSocketAddress(Const.HOST, Const.PORT));
-                } catch (SecurityException e) {
-                    Log.e("TTIM-TtApplication", ErrorTips.securityExceptionMessage);
-                    error = ErrorTips.securityExceptionMessage;
-                } catch (IOException e) {
+                } catch (Exception e) {
                     Log.e("TTIM-TtApplication", e.getMessage());
-                    error = "连接服务器失败，请确保网络连通！";
-                } catch (UnresolvedAddressException e) {
-                    Log.e("TTIM-TtApplication", ErrorTips.unresolvedAddressExceptionMessage);
-                    error = ErrorTips.unresolvedAddressExceptionMessage;
+                    error = e.getMessage();
                 }
                 sessionContext.setSocketChannel(socketChannel);
                 sessionContext.socketChannelErrorMessage = error;
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        boolean heartfalg = true;
+                        while (true) {
+                            SocketChannel socketChannel = sessionContext.getSocketChannel();
+                            //send heart
+                            ByteBuffer heart = ByteBuffer.allocate(20);
+                            heart.put(TYPE.HEART);
+                            heart.putInt(1);
+                            heart.put((byte) 120);
+                            try {
+                                heart.flip();
+                                while (heart.hasRemaining()) {
+                                    socketChannel.write(heart);
+                                }
+                                if (heartfalg) {
+                                    Log.e("TTIM-TtApplication", "heart have start");
+                                }
+                                heartfalg = false;
+                            } catch (Exception e) {
+                                try {
+                                    socketChannel.close();
+                                } catch (Exception e1) {
+                                    e1.printStackTrace();
+                                }
+                                sessionContext.setSocketChannel(null);
+                                if (!heartfalg) {
+                                    Log.e("TTIM-TtApplication", "heart have stop");
+                                    heartfalg = true;
+                                }
+                            }
+                            try {
+                                Thread.sleep(4000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }).start();
                 while (true) {
                     try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        Thread.sleep(5);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
                     }
                     socketChannel = sessionContext.getSocketChannel();
                     // socketChannel reconnect
@@ -76,44 +112,9 @@ public class TtApplication extends Application {
                                     }
                                 }
                                 flag = false;
-                            } catch (IOException e) {
-                                Log.e("TTIM-TtApplication", "connect server fail!");
-                                e.printStackTrace();
-                                try {
-                                    Thread.sleep(500);
-                                } catch (InterruptedException e1) {
-                                    e1.printStackTrace();
-                                }
+                            } catch (Exception e) {
                             }
                         }
-                    }
-                    //send heart
-                    ByteBuffer heart = ByteBuffer.allocate(20);
-                    heart.put(TYPE.HEART);
-                    heart.putInt(1);
-                    heart.put((byte) 120);
-                    try {
-                        heart.flip();
-                        while (heart.hasRemaining()) {
-                            socketChannel.write(heart);
-                        }
-                        Log.d("TTIM-TtApplication", "heart message socketChannelHashCode=" + socketChannel.hashCode());
-                    } catch (IOException e) {
-                        if (sessionContext.getSocketChannel() != null) {
-                            try {
-                                sessionContext.getSocketChannel().close();
-                            } catch (IOException e1) {
-                                e1.printStackTrace();
-                            }
-                        }
-                        try {
-                            socketChannel.close();
-                        } catch (Exception e1) {
-                            e1.printStackTrace();
-                        }
-                        sessionContext.setSocketChannel(null);
-                        Log.e("TTIM-TtApplication", e.getMessage());
-                        Log.i("TTIM-TtApplication", "Reconnecting!");
                     }
                 }
             }
@@ -125,6 +126,9 @@ public class TtApplication extends Application {
     }
 
     static public void send(TTIMPacket packet) {
+        if (sessionContext.getSocketChannel() != null) {
+            Log.e(TAG, sessionContext.getSocketChannel().hashCode() + "send Packet" + packet.getTYPE());
+        }
         new SendThread(packet).start();
     }
 

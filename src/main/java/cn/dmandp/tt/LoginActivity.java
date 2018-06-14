@@ -23,6 +23,7 @@ import cn.dmandp.common.RESP_CODE;
 import cn.dmandp.common.TYPE;
 import cn.dmandp.context.SessionContext;
 import cn.dmandp.context.TtApplication;
+import cn.dmandp.entity.TTIMPacket;
 import cn.dmandp.entity.TTUser;
 import cn.dmandp.netio.Result;
 import cn.dmandp.view.LoadView;
@@ -83,7 +84,27 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         switch (v.getId()) {
             //start loginTask
             case R.id.login_login_button:
-                new LoginTask().executeOnExecutor(Executors.newCachedThreadPool(), accountText.getText().toString(), passwordText.getText().toString());
+                int uId;
+                try {
+                    uId = Integer.parseInt(accountText.getText().toString());
+                } catch (Exception e) {
+                    Toast.makeText(LoginActivity.this, "账号不是数字！", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                String uPassword = passwordText.getText().toString();
+                TTIMPacket loginPacket = new TTIMPacket();
+                loginPacket.setTYPE(TYPE.LOGIN_REQ);
+                TTUser.Builder builder = TTUser.newBuilder();
+                builder.setUId(uId);
+                builder.setUPassword(uPassword);
+                TTUser loginuser = builder.build();
+                byte[] body = loginuser.toByteArray();
+                loginPacket.setBody(body);
+                loginPacket.setBodylength(body.length);
+                TtApplication.send(loginPacket);
+                //save password temporary
+                TtApplication.getSessionContext().setAttribute("loginpassword", uPassword);
+                //new LoginTask().executeOnExecutor(Executors.newCachedThreadPool(), accountText.getText().toString(), passwordText.getText().toString());
                 break;
             //go to register
             case R.id.login_new_user_button:
@@ -129,7 +150,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 return result;
             }
             try {
-
                 ByteBuffer byteBuffer = ByteBuffer.allocate(514);
                 byteBuffer.put(TYPE.LOGIN_REQ);
                 TTUser.Builder builder = TTUser.newBuilder();

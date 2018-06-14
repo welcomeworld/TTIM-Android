@@ -56,6 +56,7 @@ public class MessageAdapter extends ArrayAdapter<ChatMessage> {
             viewHolder.rightLayout.setVisibility(View.VISIBLE);
             viewHolder.righttouxiang.setImageResource(chatMessage.getTouxiang());
             viewHolder.rightlable.setText(chatMessage.getTitle());
+            viewHolder.time.setText(chatMessage.getTime() + "");
             viewHolder.rightusername.setText(chatMessage.getName());
             viewHolder.rightcontent.setText(chatMessage.getMessage());
         } else {
@@ -63,6 +64,7 @@ public class MessageAdapter extends ArrayAdapter<ChatMessage> {
             viewHolder.rightLayout.setVisibility(View.GONE);
             viewHolder.lefttouxiang.setImageResource(chatMessage.getTouxiang());
             viewHolder.leftlable.setText(chatMessage.getTitle());
+            viewHolder.time.setText(chatMessage.getTime() + "");
             viewHolder.leftusername.setText(chatMessage.getName());
             viewHolder.leftcontent.setText(chatMessage.getMessage());
         }

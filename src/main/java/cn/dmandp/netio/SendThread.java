@@ -4,12 +4,16 @@
 
 package cn.dmandp.netio;
 
+import android.util.Log;
+import android.widget.Toast;
+
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 import cn.dmandp.context.SessionContext;
 import cn.dmandp.context.TtApplication;
 import cn.dmandp.entity.TTIMPacket;
+import cn.dmandp.tt.MainActivity;
 
 /**
  * Created by 萌即正义 on 10/06/2018.
@@ -48,9 +52,10 @@ public class SendThread extends Thread {
                     socketChannel.write(byteBuffer);
                 }
                 byteBuffer.compact();
+                Log.e("SendThread", packet.getTYPE() + "send success");
             }
         } catch (Exception e) {
-
+            Log.e("SendThread", packet.getTYPE() + "send fail");
         }
     }
 }
