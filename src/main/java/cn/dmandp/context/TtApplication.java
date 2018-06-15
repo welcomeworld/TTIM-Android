@@ -1,14 +1,13 @@
 package cn.dmandp.context;
 import android.app.Application;
+
 import android.util.Log;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.nio.channels.UnresolvedAddressException;
+
 
 import cn.dmandp.common.Const;
-import cn.dmandp.common.ErrorTips;
 import cn.dmandp.common.TYPE;
 import cn.dmandp.entity.TTIMPacket;
 import cn.dmandp.entity.TTUser;
@@ -61,12 +60,6 @@ public class TtApplication extends Application {
                                 }
                                 heartfalg = false;
                             } catch (Exception e) {
-                                try {
-                                    socketChannel.close();
-                                } catch (Exception e1) {
-                                    e1.printStackTrace();
-                                }
-                                sessionContext.setSocketChannel(null);
                                 if (!heartfalg) {
                                     Log.e("TTIM-TtApplication", "heart have stop");
                                     heartfalg = true;
@@ -82,7 +75,7 @@ public class TtApplication extends Application {
                 }).start();
                 while (true) {
                     try {
-                        Thread.sleep(5);
+                        Thread.sleep(50);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }

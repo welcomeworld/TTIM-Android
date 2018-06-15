@@ -1,6 +1,5 @@
 package cn.dmandp.tt;
 
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -14,14 +13,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cn.dmandp.adapter.MessageAdapter;
-import cn.dmandp.common.OprateOptions;
 import cn.dmandp.common.TYPE;
 import cn.dmandp.context.TtApplication;
 import cn.dmandp.dao.TTIMDaoHelper;
@@ -49,6 +47,17 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
     }
 
     MessageAdapter adapter;
+
+    public Map<Integer, List<ChatMessage>> getAllMessages() {
+        return allMessages;
+    }
+
+    private Map<Integer, List<ChatMessage>> allMessages = new HashMap<Integer, List<ChatMessage>>();
+
+    public int getChatUserId() {
+        return chatUserId;
+    }
+
     private int chatUserId;
     private int currentUserId;
     private String currentUserName;
@@ -63,6 +72,14 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
         currentUserName = data.getString("currentUserName", "未登录");
         Bundle bundle = getIntent().getExtras();
         chatUserId = bundle.getInt("uId");
+        //select messages list
+        if (allMessages.get(chatUserId) != null) {
+            messages = allMessages.get(chatUserId);
+        } else {
+            messages = new ArrayList<ChatMessage>();
+            allMessages.put(chatUserId, messages);
+        }
+
         send = (Button) findViewById(R.id.conversation_send);
         messagetext = (EditText) findViewById(R.id.conversation_messagetext);
         send.setOnClickListener(this);
@@ -97,7 +114,7 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
     }
 
     public void datainit() {
-        Cursor message = database.rawQuery("select * from messages where Fromid=? and Toid=? order by Mtime asc limit 20", new String[]{chatUserId + "", currentUserId + ""});
+        Cursor message = database.rawQuery("select * from messages where Fromid=? and Toid=? order by Mtime asc", new String[]{chatUserId + "", currentUserId + ""});
         while (message.moveToNext()) {
             Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + chatUserId + ".png");
             if (photo == null) {

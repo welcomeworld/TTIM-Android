@@ -9,7 +9,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -20,8 +19,6 @@ import android.widget.Toast;
 import com.amitshekhar.DebugDB;
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.text.SimpleDateFormat;
@@ -37,6 +34,7 @@ import cn.dmandp.common.TYPE;
 import cn.dmandp.context.SessionContext;
 import cn.dmandp.context.TtApplication;
 import cn.dmandp.dao.TTIMDaoHelper;
+import cn.dmandp.entity.ChatMessage;
 import cn.dmandp.entity.ConversationListItem;
 import cn.dmandp.entity.TTIMPacket;
 import cn.dmandp.entity.TTMessage;
@@ -111,7 +109,13 @@ public class MessageService extends Service {
                             e.printStackTrace();
                             try {
                                 socketChannel.close();
+                                sessionContext.setSocketChannel(null);
                             } catch (Exception e1) {
+                                e1.printStackTrace();
+                            }
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e1) {
                                 e1.printStackTrace();
                             }
                             continue;
@@ -119,8 +123,14 @@ public class MessageService extends Service {
                         if (readnum == -1) {
                             try {
                                 socketChannel.close();
+                                sessionContext.setSocketChannel(null);
                             } catch (Exception e) {
                                 e.printStackTrace();
+                            }
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e1) {
+                                e1.printStackTrace();
                             }
                             continue;
                         }
@@ -319,16 +329,19 @@ public class MessageService extends Service {
                     }
                     if (body[0] == RESP_CODE.SUCCESS) {
                         try {
+                            boolean foregroundFlage = false;
                             byte[] messagebody = new byte[body.length - 1];
                             System.arraycopy(body, 1, messagebody, 0, messagebody.length);
                             TTMessage message = TTMessage.parseFrom(messagebody);
-                            Log.e(TAG, message.getMContent());
                             try {
+                                //save to database
                                 database.execSQL("insert into messages values(?,?,?,?);", new Object[]{message.getMContent(), message.getMTime(), message.getMFromId(), message.getMToId()});
                             } catch (SQLiteConstraintException e) {
                                 Log.e(TAG, e.getMessage());
+                                return;
                             }
-                            if (mainActivity != null && mainActivity.isForeground()) {
+
+                            if (mainActivity != null) {
                                 ConversationListItemAdapter conversationListItemAdapter = mainActivity.getConversationListItemAdapter();
                                 SharedPreferences messagePreferences = getSharedPreferences("message", MODE_PRIVATE);
                                 SharedPreferences.Editor messageEditor = messagePreferences.edit();
@@ -341,7 +354,6 @@ public class MessageService extends Service {
                                     String username = "未知用户";
                                     if (photo == null) {
                                         photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
-                                        Log.e("MainActivity", "do not have file");
                                     }
                                     if (cursor.moveToNext()) {
                                         username = cursor.getString(cursor.getColumnIndex("Uname"));
@@ -349,33 +361,50 @@ public class MessageService extends Service {
                                     SimpleDateFormat format = new SimpleDateFormat("HH:MM");
                                     ConversationListItem friend = new ConversationListItem(message.getMFromId(), username, message.getMContent(), format.format(new Date(message.getMTime())), 1 + "", photo);
                                     conversationList.add(0, friend);
-                                    conversationListItemAdapter.notifyItemInserted(0);
                                     messageEditor.putInt(message.getMFromId() + ":" + message.getMToId(), 1);
-                                    messageEditor.commit();
-                                    return;
-                                }
+                                    conversationListItemAdapter.notifyItemInserted(0);
+                                } else {
                                 //in message list now
-                                boolean flag = true;
                                 for (int i = 0; i < conversationList.size(); i++) {
                                     if (conversationList.get(i).getUId() == message.getMFromId()) {
-                                        conversationList.get(i).setNewMessage(messageCount + 1 + "");
+                                        SimpleDateFormat format = new SimpleDateFormat("HH:MM");
+                                        if (conversationActivity != null && conversationActivity.isForeground() && conversationActivity.getChatUserId() == message.getMFromId()) {
+                                            conversationList.get(i).setNewMessage(0 + "");
+                                            messageEditor.putInt(message.getMFromId() + ":" + message.getMToId(), 0);
+                                        } else {
+                                            conversationList.get(i).setNewMessage(messageCount + 1 + "");
+                                            messageEditor.putInt(message.getMFromId() + ":" + message.getMToId(), messageCount + 1);
+                                        }
+                                        conversationList.get(i).setMessage(message.getMContent());
+                                        conversationList.get(i).setTime(format.format(new Date(message.getMTime())));
                                         conversationListItemAdapter.notifyItemChanged(i);
-                                        flag = false;
                                         break;
                                     }
                                 }
-                                if (flag) {
-                                    Log.e(TAG, "信息没有加入列表");
                                 }
-                                return;
+                                if (mainActivity.isForeground()) {
+                                    foregroundFlage = true;
+                                }
+                                messageEditor.commit();
                             }
                             //is chatting
-                            if (conversationActivity != null && conversationActivity.isForeground()) {
-                                Log.e(TAG, "get message" + message.getMContent());
-                                return;
+                            if (conversationActivity != null) {
+                                if (conversationActivity.getAllMessages().get(message.getMFromId()) != null) {
+                                    conversationActivity.getAllMessages().get(message.getMFromId()).add(new ChatMessage(R.drawable.ty, "暂定", message.getMFromId() + "", message.getMContent(), message.getMTime(), 0));
+                                }
+                                List<ChatMessage> messages = conversationActivity.getMessages();
+                                //chatting with message sender
+                                if (messages.equals(conversationActivity.getAllMessages().get(message.getMFromId()))) {
+                                    conversationActivity.getAdapter().notifyDataSetChanged();
+                                }
+                                if (conversationActivity.isForeground()) {
+                                    foregroundFlage = true;
+                                }
                             }
                             //app in background
-                            Log.e(TAG, "app in background get message" + message.getMContent());
+                            if (!foregroundFlage) {
+
+                            }
                         } catch (InvalidProtocolBufferException e) {
                             e.printStackTrace();
                         }

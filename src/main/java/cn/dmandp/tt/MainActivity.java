@@ -5,7 +5,6 @@
 package cn.dmandp.tt;
 
 import android.annotation.SuppressLint;
-import android.app.Application;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -13,7 +12,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
@@ -33,7 +31,6 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -199,6 +196,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 SharedPreferences messageSharedPreferences = getSharedPreferences("message", MODE_PRIVATE);
                 SharedPreferences.Editor editor = messageSharedPreferences.edit();
                 int messageCount = messageSharedPreferences.getInt(uId + ":" + currentUserId, 0);
+                editor.putInt(uId + ":" + currentUserId, 0);
+                editor.commit();
                 if (messageCount != 0) {
                     for (ConversationListItem item : conversationList) {
                         if (item.getUId() == uId) {
@@ -207,8 +206,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                             break;
                         }
                     }
-                    editor.putInt(uId + ":" + currentUserId, 0);
-                    editor.commit();
                 }
             }
         });
