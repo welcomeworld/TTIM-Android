@@ -1,5 +1,8 @@
 package cn.dmandp.service;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,10 +11,12 @@ import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -340,12 +345,11 @@ public class MessageService extends Service {
                                 Log.e(TAG, e.getMessage());
                                 return;
                             }
-
+                            SharedPreferences messagePreferences = getSharedPreferences("message", MODE_PRIVATE);
+                            SharedPreferences.Editor messageEditor = messagePreferences.edit();
+                            int messageCount = messagePreferences.getInt(message.getMFromId() + ":" + message.getMToId(), -1);
                             if (mainActivity != null) {
                                 ConversationListItemAdapter conversationListItemAdapter = mainActivity.getConversationListItemAdapter();
-                                SharedPreferences messagePreferences = getSharedPreferences("message", MODE_PRIVATE);
-                                SharedPreferences.Editor messageEditor = messagePreferences.edit();
-                                int messageCount = messagePreferences.getInt(message.getMFromId() + ":" + message.getMToId(), -1);
                                 List<ConversationListItem> conversationList = mainActivity.getConversationList();
                                 //not in message list add it to
                                 if (messageCount == -1) {
@@ -390,7 +394,19 @@ public class MessageService extends Service {
                             //is chatting
                             if (conversationActivity != null) {
                                 if (conversationActivity.getAllMessages().get(message.getMFromId()) != null) {
-                                    conversationActivity.getAllMessages().get(message.getMFromId()).add(new ChatMessage(R.drawable.ty, "暂定", message.getMFromId() + "", message.getMContent(), message.getMTime(), 0));
+                                    Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + message.getMFromId() + ".png");
+                                    if (photo == null) {
+                                        photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                                    }
+                                    SimpleDateFormat format = new SimpleDateFormat("HH:MM");
+                                    Cursor friendCursor = database.rawQuery("select * from friends where uid=? and friendid=?", new String[]{message.getMToId() + "", message.getMFromId() + ""});
+                                    String chatUserName;
+                                    if (friendCursor.moveToNext()) {
+                                        chatUserName = friendCursor.getString(friendCursor.getColumnIndex("Uname"));
+                                    } else {
+                                        chatUserName = "未知";
+                                    }
+                                    conversationActivity.getAllMessages().get(message.getMFromId()).add(new ChatMessage(photo, chatUserName + "", message.getMContent(), format.format(new Date(message.getMTime())), 1));
                                 }
                                 List<ChatMessage> messages = conversationActivity.getMessages();
                                 //chatting with message sender
@@ -403,7 +419,23 @@ public class MessageService extends Service {
                             }
                             //app in background
                             if (!foregroundFlage) {
-
+                                Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + message.getMFromId() + ".png");
+                                if (photo == null) {
+                                    photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                                }
+                                Intent resultIntent = new Intent(MessageService.this, MainActivity.class);
+                                PendingIntent resultPendingIntent = PendingIntent.getActivity(MessageService.this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                                NotificationCompat.Builder builder = new NotificationCompat.Builder(MessageService.this, "highChannel");
+                                builder.setSmallIcon(R.drawable.ty);
+                                builder.setLargeIcon(photo);
+                                builder.setContentText(message.getMContent());
+                                builder.setContentTitle(message.getMFromId() + "");
+                                builder.setContentIntent(resultPendingIntent);
+                                builder.setNumber(messageCount == -1 ? 1 : messageCount + 1);
+                                builder.setDefaults(Notification.DEFAULT_ALL);
+                                Notification notification = builder.build();
+                                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                                notificationManager.notify(message.getMFromId(), notification);
                             }
                         } catch (InvalidProtocolBufferException e) {
                             e.printStackTrace();
@@ -422,6 +454,34 @@ public class MessageService extends Service {
                             try {
                                 TTUser getUser = TTUser.parseFrom(userbody);
                                 database.execSQL("insert into friends values(?,?,?)", new String[]{sessionContext.getuID() + "", getUser.getUId() + "", getUser.getUName()});
+                                //change mainActivity
+                                if (mainActivity != null) {
+                                    ConversationListItemAdapter conversationListItemAdapter = mainActivity.getConversationListItemAdapter();
+                                    List<ConversationListItem> conversationList = mainActivity.getConversationList();
+                                    for (int i = 0; i < conversationList.size(); i++) {
+                                        if (conversationList.get(i).getUId() == getUser.getUId()) {
+                                            if (conversationList.get(i).getUsername() != getUser.getUName()) {
+                                                conversationList.get(i).setUsername(getUser.getUName());
+                                                conversationListItemAdapter.notifyItemChanged(i);
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+                                //change conversationActivity
+                                if (conversationActivity != null) {
+                                    if (conversationActivity.getChatUserId() == getUser.getUId()) {
+                                        if (conversationActivity.getChatUserName() != getUser.getUName()) {
+                                            for (int i = 0; i < conversationActivity.getMessages().size(); i++) {
+                                                if (conversationActivity.getMessages().get(i).getType() != 0) {
+                                                    conversationActivity.getMessages().get(i).setName(getUser.getUName());
+                                                }
+                                            }
+                                            conversationActivity.setChatUserName(getUser.getUName());
+                                            conversationActivity.getAdapter().notifyDataSetChanged();
+                                        }
+                                    }
+                                }
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }

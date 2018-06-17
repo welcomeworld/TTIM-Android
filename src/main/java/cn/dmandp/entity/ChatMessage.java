@@ -1,39 +1,31 @@
 package cn.dmandp.entity;
 
+import android.graphics.Bitmap;
+
 /**
  * Created by 萌即正义 on 16/03/2018.
  */
 
 public class ChatMessage {
-    private String title;
-    private int touxiang;
+    private Bitmap touxiang;
     private String name;
     private String message;
-    private long time;
+    private String time;
     private int type;
 
-    public ChatMessage(int touxiang, String title, String name, String message, long time, int type) {
+    public ChatMessage(Bitmap touxiang, String name, String message, String time, int type) {
         this.touxiang = touxiang;
-        this.title = title;
         this.name = name;
         this.message = message;
         this.time = time;
         this.type = type;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public int getTouxiang() {
+    public Bitmap getTouxiang() {
         return touxiang;
     }
 
-    public void setTouxiang(int touxiang) {
+    public void setTouxiang(Bitmap touxiang) {
         this.touxiang = touxiang;
     }
 
@@ -53,11 +45,11 @@ public class ChatMessage {
         this.message = message;
     }
 
-    public long getTime() {
+    public String getTime() {
         return time;
     }
 
-    public void setTime(long time) {
+    public void setTime(String time) {
         this.time = time;
     }
 

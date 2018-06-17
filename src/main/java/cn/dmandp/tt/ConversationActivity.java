@@ -15,15 +15,18 @@ import android.widget.ListView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import cn.dmandp.adapter.MessageAdapter;
 import cn.dmandp.common.TYPE;
+import cn.dmandp.context.SessionContext;
 import cn.dmandp.context.TtApplication;
 import cn.dmandp.dao.TTIMDaoHelper;
 import cn.dmandp.entity.ChatMessage;
+import cn.dmandp.entity.ConversationListItem;
 import cn.dmandp.entity.TTIMPacket;
 import cn.dmandp.entity.TTMessage;
 
@@ -62,6 +65,16 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
     private int currentUserId;
     private String currentUserName;
 
+    public String getChatUserName() {
+        return chatUserName;
+    }
+
+    public void setChatUserName(String chatUserName) {
+        this.chatUserName = chatUserName;
+    }
+
+    private String chatUserName;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +85,12 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
         currentUserName = data.getString("currentUserName", "未登录");
         Bundle bundle = getIntent().getExtras();
         chatUserId = bundle.getInt("uId");
+        Cursor friendCursor = database.rawQuery("select * from friends where uid=? and friendid=?", new String[]{currentUserId + "", chatUserId + ""});
+        if (friendCursor.moveToNext()) {
+            chatUserName = friendCursor.getString(friendCursor.getColumnIndex("Uname"));
+        } else {
+            chatUserName = "未知";
+        }
         //select messages list
         if (allMessages.get(chatUserId) != null) {
             messages = allMessages.get(chatUserId);
@@ -104,27 +123,56 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
                 messagePacket.setBodylength(message.toByteArray().length);
                 messagePacket.setBody(message.toByteArray());
                 TtApplication.send(messagePacket);
-                ChatMessage newMessage = new ChatMessage(R.drawable.ty, "暂定", currentUserName, messagetext.getText() + "", 200L, 0);
+                Bitmap userPhoto = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + currentUserId + ".png");
+                if (userPhoto == null) {
+                    userPhoto = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                }
+                SimpleDateFormat format = new SimpleDateFormat("HH:MM");
+                ChatMessage newMessage = new ChatMessage(userPhoto, currentUserName, messagetext.getText() + "", format.format(new Date(message.getMTime())), 0);
                 messagetext.setText("");
                 messages.add(newMessage);
                 adapter.notifyDataSetChanged();
+                MainActivity mainActivity = (MainActivity) SessionContext.activities.get("MainActivity");
+                if (mainActivity != null) {
+                    List<ConversationListItem> conversationList = mainActivity.getConversationList();
+                    for (int i = 0; i < conversationList.size(); i++) {
+                        if (conversationList.get(i).getUId() == message.getMToId()) {
+                            conversationList.get(i).setMessage(message.getMContent());
+                            conversationList.get(i).setTime(format.format(new Date(message.getMTime())));
+                            mainActivity.getConversationListItemAdapter().notifyItemChanged(i);
+                            break;
+                        }
+                    }
+                }
+                try {
+                    database.execSQL("insert into messages values(?,?,?,?)", new Object[]{message.getMContent(), message.getMTime(), message.getMFromId(), message.getMToId()});
+                } catch (Exception e) {
+                }
             default:
                 break;
         }
     }
 
     public void datainit() {
-        Cursor message = database.rawQuery("select * from messages where Fromid=? and Toid=? order by Mtime asc", new String[]{chatUserId + "", currentUserId + ""});
+        Cursor message = database.rawQuery("select * from messages where (Fromid=? and Toid=?) or (Fromid=? and Toid=?)order by Mtime asc", new String[]{chatUserId + "", currentUserId + "", currentUserId + "", chatUserId + ""});
         while (message.moveToNext()) {
             Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + chatUserId + ".png");
+            Bitmap userPhoto = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + currentUserId + ".png");
             if (photo == null) {
                 photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
-                Log.e(TAG, "do not have file" + chatUserId + ".png");
+            }
+            if (userPhoto == null) {
+                userPhoto = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
             }
             SimpleDateFormat format = new SimpleDateFormat("HH:MM");
             String mcontent = message.getString(message.getColumnIndex("mcontent"));
             Long mtime = message.getLong(message.getColumnIndex("Mtime"));
-            messages.add(new ChatMessage(R.drawable.ty, "暂定", chatUserId + "", mcontent, mtime, 0));
+            int fromid = message.getInt(message.getColumnIndex("Fromid"));
+            if (fromid == currentUserId) {
+                messages.add(new ChatMessage(userPhoto, currentUserName + "", mcontent, format.format(new Date(mtime)), 0));
+            } else {
+                messages.add(new ChatMessage(photo, chatUserName + "", mcontent, format.format(new Date(mtime)), 1));
+            }
         }
     }
 }

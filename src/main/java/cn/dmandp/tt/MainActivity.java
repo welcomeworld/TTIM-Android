@@ -5,6 +5,7 @@
 package cn.dmandp.tt;
 
 import android.annotation.SuppressLint;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -219,6 +220,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.cancelAll();
+    }
+
     class MainTask extends AsyncTask<String, String, Result> {
 
         @Override
@@ -289,7 +297,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             int friendid = cursor.getInt(cursor.getColumnIndex("friendid"));
             int messagecount = messagePreferences.getInt(friendid + ":" + currentUserId, -1);
             String uname = cursor.getString(cursor.getColumnIndex("Uname"));
-            Cursor message = database.rawQuery("select * from messages where Fromid=? and Toid=? order by Mtime desc limit 1", new String[]{friendid + "", currentUserId + ""});
+            Cursor message = database.rawQuery("select * from messages where (Fromid=? and Toid=?) and (Fromid=? and Toid=?) order by Mtime desc limit 1", new String[]{friendid + "", currentUserId + "", currentUserId + "", friendid + ""});
             if (messagecount != -1 && message.moveToNext()) {
                 Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + friendid + ".png");
                 if (photo == null) {

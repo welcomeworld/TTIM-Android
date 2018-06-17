@@ -38,13 +38,11 @@ public class MessageAdapter extends ArrayAdapter<ChatMessage> {
             viewHolder.leftLayout = (LinearLayout) view.findViewById(R.id.left_message_layout);
             viewHolder.lefttouxiang = (ImageView) view.findViewById(R.id.touxiang_left);
             viewHolder.leftcontent = (TextView) view.findViewById(R.id.message_content_left);
-            viewHolder.leftlable = (TextView) view.findViewById(R.id.user_lable_left);
             viewHolder.leftusername = (TextView) view.findViewById(R.id.message_username_left);
             viewHolder.time = (TextView) view.findViewById(R.id.message_time);
             viewHolder.rightLayout = (LinearLayout) view.findViewById(R.id.right_message_layout);
             viewHolder.righttouxiang = (ImageView) view.findViewById(R.id.touxiang_right);
             viewHolder.rightcontent = (TextView) view.findViewById(R.id.message_content_right);
-            viewHolder.rightlable = (TextView) view.findViewById(R.id.user_lable_right);
             viewHolder.rightusername = (TextView) view.findViewById(R.id.message_username_right);
             view.setTag(viewHolder);
         } else {
@@ -54,16 +52,14 @@ public class MessageAdapter extends ArrayAdapter<ChatMessage> {
         if (chatMessage.getType() == 0) {
             viewHolder.leftLayout.setVisibility(View.GONE);
             viewHolder.rightLayout.setVisibility(View.VISIBLE);
-            viewHolder.righttouxiang.setImageResource(chatMessage.getTouxiang());
-            viewHolder.rightlable.setText(chatMessage.getTitle());
+            viewHolder.righttouxiang.setImageBitmap(chatMessage.getTouxiang());
             viewHolder.time.setText(chatMessage.getTime() + "");
             viewHolder.rightusername.setText(chatMessage.getName());
             viewHolder.rightcontent.setText(chatMessage.getMessage());
         } else {
             viewHolder.leftLayout.setVisibility(View.VISIBLE);
             viewHolder.rightLayout.setVisibility(View.GONE);
-            viewHolder.lefttouxiang.setImageResource(chatMessage.getTouxiang());
-            viewHolder.leftlable.setText(chatMessage.getTitle());
+            viewHolder.lefttouxiang.setImageBitmap(chatMessage.getTouxiang());
             viewHolder.time.setText(chatMessage.getTime() + "");
             viewHolder.leftusername.setText(chatMessage.getName());
             viewHolder.leftcontent.setText(chatMessage.getMessage());
@@ -81,7 +77,5 @@ public class MessageAdapter extends ArrayAdapter<ChatMessage> {
         TextView leftcontent;
         TextView rightcontent;
         TextView time;
-        TextView leftlable;
-        TextView rightlable;
     }
 }

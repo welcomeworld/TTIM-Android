@@ -1,6 +1,10 @@
 package cn.dmandp.context;
 import android.app.Application;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.graphics.Color;
 import android.util.Log;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -24,6 +28,7 @@ public class TtApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        notificationChannelInit();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -123,6 +128,18 @@ public class TtApplication extends Application {
             Log.e(TAG, sessionContext.getSocketChannel().hashCode() + "send Packet" + packet.getTYPE());
         }
         new SendThread(packet).start();
+    }
+
+    public void notificationChannelInit() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationChannel notificationChannel = new NotificationChannel("highChannel", "notificationChannel", NotificationManager.IMPORTANCE_HIGH);
+            notificationChannel.enableLights(true);
+            notificationChannel.setLightColor(Color.GREEN);
+            notificationChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+            notificationChannel.setShowBadge(true);
+            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
     }
 
     ;
