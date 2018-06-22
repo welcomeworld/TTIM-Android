@@ -61,5 +61,21 @@ public interface TYPE {
      * user info update resp
      */
     static final byte USERINFO_RESP = 14;
+    /**
+     * user photo get req
+     */
+    static final byte USERPHOTO_GET_REQ = 15;
+    /**
+     * user photo get resp
+     */
+    static final byte USERPHOTO_GET_RESP = 16;
+    /**
+     * user photo set req
+     */
+    static final byte USERPHOTO_SET_REQ = 17;
+    /**
+     * user photo set resp
+     */
+    static final byte USERPHOTO_SET_RESP = 18;
 }
 

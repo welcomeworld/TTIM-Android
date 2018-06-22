@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="60dp"
-    android:padding="5dp">
+    android:layout_height="64dp"
+    android:padding="8dp">
 
     <ImageView
         android:id="@+id/conversationlistitem_image"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:padding="5dp"
-        android:src="@drawable/logo" />
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:padding="8dp"
+        android:src="@drawable/logo"
+        android:contentDescription="@string/image_description" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_weight="1">
@@ -20,17 +21,17 @@
         <TextView
             android:id="@+id/conversationlistitem_user"
             android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:textSize="20dp"
-            android:text="用户账号"
+            android:layout_height="32dp"
+            android:textSize="20sp"
+            android:text="@string/account_text"
             android:textColor="#000" />
 
         <TextView
             android:id="@+id/conversationlistitem_message"
             android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:textSize="15dp"
-            android:text="信息" />
+            android:layout_height="32dp"
+            android:textSize="16sp"
+            android:text="@string/message" />
     </LinearLayout>
 
     <LinearLayout
@@ -42,18 +43,16 @@
             android:id="@+id/conversationlistitem_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="right"
-            android:layout_gravity="right"
-            android:text="22:00" />
+            android:gravity="end"
+            android:layout_gravity="end"
+            android:text="@string/time_text" />
 
         <TextView
             android:id="@+id/conversationlistitem_newmessage"
-            android:layout_width="19dp"
-            android:layout_height="19dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:gravity="center"
             android:background="@drawable/new_message"
-            android:text="99" />
-
+            android:text="@string/message_count_text" />
     </LinearLayout>
-
 </LinearLayout>

@@ -12,52 +12,55 @@
         android:orientation="vertical">
 
         <ImageView
-            android:layout_marginTop="45dp"
+            android:layout_marginTop="48dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/logo"
-            android:layout_gravity="center" />
+            android:layout_gravity="center"
+            android:contentDescription="@string/image_description" />
 
         <EditText
             android:id="@+id/register_account_edittext"
             android:layout_marginTop="40dp"
             android:layout_width="match_parent"
-            android:layout_marginLeft="15dp"
-            android:layout_marginRight="15dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:hint="账号    //登录用，自定义数字" />
+            android:hint="@string/account_hint"
+            android:inputType="number" />
 
         <EditText
             android:id="@+id/register_uname_edittext"
-            android:layout_marginLeft="15dp"
-            android:layout_marginRight="15dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:hint="昵称" />
+            android:hint="@string/username_hint"
+            android:inputType="text" />
 
         <EditText
             android:id="@+id/register_password_edittext"
-            android:layout_marginLeft="15dp"
-            android:layout_marginRight="15dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:inputType="textPassword"
-            android:hint="密码" />
+            android:hint="@string/password_hint" />
 
         <Button
             android:id="@+id/register_register_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginRight="15dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginLeft="15dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginLeft="16dp"
             android:layout_gravity="center"
             android:textSize="20sp"
             android:background="@drawable/button_red"
-            android:text="注   册" />
+            android:text="@string/register_text" />
     </LinearLayout>
 
     <RelativeLayout
@@ -68,13 +71,13 @@
 
         <Button
             android:id="@+id/register_login_button"
-            android:layout_width="70dp"
+            android:layout_width="72dp"
             android:layout_height="40dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:text="已有账号"
-            android:textSize="15dp"
+            android:text="@string/have_account"
+            android:textSize="16sp"
             android:textColor="#1C86EE"
             android:background="#00000000" />
     </RelativeLayout>

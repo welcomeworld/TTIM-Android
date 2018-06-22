@@ -19,6 +19,7 @@ import android.os.Message;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.amitshekhar.DebugDB;
@@ -44,6 +45,7 @@ import cn.dmandp.entity.ConversationListItem;
 import cn.dmandp.entity.TTIMPacket;
 import cn.dmandp.entity.TTMessage;
 import cn.dmandp.entity.TTUser;
+import cn.dmandp.netio.FileThread;
 import cn.dmandp.tt.ConversationActivity;
 import cn.dmandp.tt.LoginActivity;
 import cn.dmandp.tt.MainActivity;
@@ -197,15 +199,21 @@ public class MessageService extends Service {
     public class TTIMHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
-            SessionContext sessionContext = ((TtApplication) getApplication()).getSessionContext();
+            SessionContext sessionContext = TtApplication.getSessionContext();
             LoginActivity loginActivity = (LoginActivity) SessionContext.activities.get("LoginActivity");
             MainActivity mainActivity = (MainActivity) SessionContext.activities.get("MainActivity");
             ConversationActivity conversationActivity = (ConversationActivity) SessionContext.activities.get("ConversationActivity");
             Bundle bundle = msg.getData();
+            SharedPreferences userSharedPreferences = getSharedPreferences("data", MODE_PRIVATE);
+            int currentUserId = userSharedPreferences.getInt("currentUserId", -1);
             byte[] body = bundle.getByteArray("body");
+
             switch (msg.what) {
                 //Login -----start
                 case TYPE.LOGIN_RESP:
+                    if (body == null) {
+                        return;
+                    }
                     byte[] user = new byte[body.length - 1];
                     System.arraycopy(body, 1, user, 0, user.length);
                     //have been login so do nothing
@@ -249,6 +257,10 @@ public class MessageService extends Service {
                                     friendpacket.setBodylength(friendByteBuffer.remaining());
                                     friendpacket.setBody(friendByteBuffer.array());
                                     TtApplication.send(friendpacket);
+                                    Bundle fileBundle = new Bundle();
+                                    fileBundle.putInt("uid", friendid);
+                                    fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
+                                    new FileThread(MessageService.this, fileBundle, handler).start();
                                 }
                             }
                             //save login status(id and user bean) in sessionContext
@@ -261,6 +273,10 @@ public class MessageService extends Service {
                             packet.setBodylength(receivebody.length);
                             packet.setBody(receivebody);
                             TtApplication.send(packet);
+                            Bundle fileBundle = new Bundle();
+                            fileBundle.putInt("uid", currentUser.getUId());
+                            fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
+                            new FileThread(MessageService.this, fileBundle, handler).start();
                         }
                         break;
                     }
@@ -305,6 +321,10 @@ public class MessageService extends Service {
                                 friendpacket.setBodylength(friendByteBuffer.remaining());
                                 friendpacket.setBody(friendByteBuffer.array());
                                 TtApplication.send(friendpacket);
+                                Bundle fileBundle = new Bundle();
+                                fileBundle.putInt("uid", friendid);
+                                fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
+                                new FileThread(MessageService.this, fileBundle, handler).start();
                             }
                         }
                         //save login status(id and user bean) in sessionContext
@@ -321,6 +341,10 @@ public class MessageService extends Service {
                         packet.setBodylength(receivebody.length);
                         packet.setBody(receivebody);
                         TtApplication.send(packet);
+                        Bundle fileBundle = new Bundle();
+                        fileBundle.putInt("uid", currentUser.getUId());
+                        fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
+                        new FileThread(MessageService.this, fileBundle, handler).start();
                     }
                     break;
                 //Login ------end
@@ -489,6 +513,48 @@ public class MessageService extends Service {
                     }
                     break;
                 //userInfo end
+                case TYPE.USERPHOTO_GET_RESP:
+                case TYPE.USERPHOTO_SET_RESP:
+                    int uid = bundle.getInt("uid", -1);
+                    if (uid == -1) {
+                        return;
+                    }
+                    Bitmap photo = BitmapFactory.decodeFile(getFilesDir().getAbsolutePath() + "/head_portrait/" + uid + ".png");
+                    if (photo == null) {
+                        Log.e("MessageService", "File is not exist");
+                        return;
+                    }
+                    //update MainActivity's photo
+                    if (mainActivity != null) {
+                        ConversationListItemAdapter conversationListItemAdapter = mainActivity.getConversationListItemAdapter();
+                        List<ConversationListItem> conversationList = mainActivity.getConversationList();
+                        for (int i = 0; i < conversationList.size(); i++) {
+                            if (conversationList.get(i).getUId() == uid) {
+                                conversationList.get(i).setImage(photo);
+                                conversationListItemAdapter.notifyItemChanged(i);
+                                break;
+                            }
+                        }
+                        if (uid == currentUserId) {
+                            ImageView headerPhotoView = mainActivity.getHeaderView().findViewById(R.id.navigation_photo_header);
+                            headerPhotoView.setImageBitmap(photo);
+                        }
+                    }
+                    //update ConversationActivity's photo
+                    if (conversationActivity != null) {
+                        if (conversationActivity.getChatUserId() == uid) {
+                            for (int i = 0; i < conversationActivity.getMessages().size(); i++) {
+                                if (conversationActivity.getMessages().get(i).getType() == 0 && uid != currentUserId) {
+                                    conversationActivity.getMessages().get(i).setTouxiang(photo);
+                                }
+                                if (conversationActivity.getMessages().get(i).getType() != 0 && uid == currentUserId) {
+                                    conversationActivity.getMessages().get(i).setTouxiang(photo);
+                                }
+                            }
+                            conversationActivity.getAdapter().notifyDataSetChanged();
+                        }
+                    }
+                    break;
             }
         }
     }

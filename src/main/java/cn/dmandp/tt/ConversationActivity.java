@@ -91,6 +91,7 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
         } else {
             chatUserName = "未知";
         }
+        friendCursor.close();
         //select messages list
         if (allMessages.get(chatUserId) != null) {
             messages = allMessages.get(chatUserId);
@@ -174,5 +175,6 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
                 messages.add(new ChatMessage(photo, chatUserName + "", mcontent, format.format(new Date(mtime)), 1));
             }
         }
+        message.close();
     }
 }

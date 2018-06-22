@@ -5,6 +5,7 @@
 package cn.dmandp.tt;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,7 +13,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
@@ -29,10 +32,12 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -49,6 +54,7 @@ import cn.dmandp.adapter.ConversationListItemAdapter;
 import cn.dmandp.context.SessionContext;
 import cn.dmandp.context.TtApplication;
 import cn.dmandp.entity.TTUser;
+import cn.dmandp.netio.FileThread;
 import cn.dmandp.netio.Result;
 import cn.dmandp.service.MessageService;
 import cn.dmandp.view.LoadView;
@@ -74,8 +80,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
     private RecyclerView recyclerView;
-    private CoordinatorLayout coordinatorLayout;
     LoadView loadView;
+
+    public View getHeaderView() {
+        return headerView;
+    }
+
+    private View headerView;
 
     @SuppressLint("RestrictedApi")
     @Override
@@ -106,7 +117,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             }
         }
         //View initialization
-        coordinatorLayout = findViewById(R.id.main_coordinatorLayout);
         loadView = findViewById(R.id.main_loadview);
 
         drawerLayout = findViewById(R.id.main_drawerLayout);
@@ -119,7 +129,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.menu_main_add:
-                        Toast.makeText(MainActivity.this, "your click the add friends!", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent();
+                        intent.setAction(Intent.ACTION_GET_CONTENT);
+                        intent.setType("image/png");
+                        intent.addCategory(Intent.CATEGORY_OPENABLE);
+                        startActivityForResult(Intent.createChooser(intent, "请选择你的头像文件"), 1);
                         break;
                     case R.id.menu_main_scan:
                         Toast.makeText(MainActivity.this, "your click the scan!", Toast.LENGTH_SHORT).show();
@@ -177,7 +191,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 return false;
             }
         });
-        View headerView = navigationView.inflateHeaderView(R.layout.navigation_header_main);
+        headerView = navigationView.inflateHeaderView(R.layout.navigation_header_main);
         TextView nameText = headerView.findViewById(R.id.navigation_name_header);
         nameText.setText(uName);
         //-----NavigationView initialization end
@@ -218,6 +232,33 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @Override
     public void onClick(View v) {
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == Activity.RESULT_OK) {
+            Uri uri = data.getData();
+            String url;
+            url = uri.getPath();
+
+            Uri selectedImage = data.getData();
+            String picturePath = null;
+            try {
+                String[] filePathColumns = {MediaStore.Images.Media.DATA};
+                Cursor c = this.getContentResolver().query(selectedImage, filePathColumns, null, null, null);
+                c.moveToFirst();
+                int columnIndex = c.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);//getColumnIndex(filePathColumns[0]);
+                picturePath = c.getString(columnIndex);
+                c.close();
+            } catch (Exception e) {
+                picturePath = selectedImage.getPath();
+            }
+            if (picturePath != null) {
+                Toast.makeText(this, picturePath, Toast.LENGTH_LONG).show();
+            }
+
+
+        }
     }
 
     @Override
@@ -310,6 +351,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 conversationList.add(new ConversationListItem(friendid, uname, mcontent, format.format(new Date(mtime)), messagecount + "", photo));
             }
         }
+        Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + currentUserId + ".png");
+        if (photo == null) {
+            photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+            Log.e("MainActivity", "do not have file" + currentUserId + ".png");
+        }
+        ImageView headerPhotoView = headerView.findViewById(R.id.navigation_photo_header);
+        headerPhotoView.setImageBitmap(photo);
     }
 
 }

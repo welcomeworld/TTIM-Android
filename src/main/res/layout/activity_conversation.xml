@@ -11,39 +11,43 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:background="@color/light_blue"
-        android:padding="5dp">
+        android:padding="8dp">
 
         <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/whit_left_back" />
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/whit_left_back"
+            android:contentDescription="@string/image_description" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="消息"
+            android:text="@string/message"
             android:textSize="20sp"
             android:textColor="@color/white" />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             tools:text="用户名"
-            android:textSize="25sp"
+            android:textSize="24sp"
             android:layout_gravity="center"
             android:layout_weight="1"
             android:gravity="center" />
 
         <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/phone_right" />
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/phone_right"
+            android:contentDescription="@string/image_description" />
 
         <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:src="@drawable/user_right"
-            android:layout_marginLeft="10dp" />
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:contentDescription="@string/image_description" />
     </LinearLayout>
 
     <ListView
@@ -65,16 +69,18 @@
 
         <EditText
             android:id="@+id/conversation_messagetext"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_weight="1"
-            android:background="@color/white" />
+            android:background="@color/white"
+            android:inputType="text"
+            android:hint="@string/message" />
 
         <Button
             android:id="@+id/conversation_send"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
-            android:text="发送"
+            android:text="@string/send"
             android:textColor="@color/light_blue"
             android:background="#0000" />
     </LinearLayout>
