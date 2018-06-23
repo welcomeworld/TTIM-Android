@@ -12,11 +12,15 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -50,6 +54,7 @@ import cn.dmandp.tt.ConversationActivity;
 import cn.dmandp.tt.LoginActivity;
 import cn.dmandp.tt.MainActivity;
 import cn.dmandp.tt.R;
+import cn.dmandp.utils.ImageUtil;
 
 /**
  * try to get message from server and parse it then send to handler
@@ -60,15 +65,27 @@ public class MessageService extends Service {
     SQLiteDatabase database;
     String TAG = "TTIM-MessageService";
     boolean start = false;
-    TTIMHandler handler = new TTIMHandler();
+    static MessageService instance;
+
+    public TTIMHandler getHandler() {
+        return handler;
+    }
+
+    public static MessageService getInstance() {
+        return instance;
+    }
+
+    TTIMHandler handler;
 
     public MessageService() {
     }
 
     @Override
     public void onCreate() {
+        instance = this;
         Log.i("TTIM-MessageService", "MessageService onCreate");
         database = daoHelper.getReadableDatabase();
+        handler = new TTIMHandler();
         super.onCreate();
     }
 
@@ -192,7 +209,13 @@ public class MessageService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return new MessageServiceBinder();
+    }
+
+    public class MessageServiceBinder extends Binder {
+        Handler getHandler() {
+            return handler;
+        }
     }
 
     //handle message and update UI
@@ -386,8 +409,10 @@ public class MessageService extends Service {
                                     if (cursor.moveToNext()) {
                                         username = cursor.getString(cursor.getColumnIndex("Uname"));
                                     }
+                                    RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+                                    roundedBitmapDrawable.setCircular(true);
                                     SimpleDateFormat format = new SimpleDateFormat("HH:MM");
-                                    ConversationListItem friend = new ConversationListItem(message.getMFromId(), username, message.getMContent(), format.format(new Date(message.getMTime())), 1 + "", photo);
+                                    ConversationListItem friend = new ConversationListItem(message.getMFromId(), username, message.getMContent(), format.format(new Date(message.getMTime())), 1 + "", roundedBitmapDrawable);
                                     conversationList.add(0, friend);
                                     messageEditor.putInt(message.getMFromId() + ":" + message.getMToId(), 1);
                                     conversationListItemAdapter.notifyItemInserted(0);
@@ -422,6 +447,8 @@ public class MessageService extends Service {
                                     if (photo == null) {
                                         photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
                                     }
+                                    RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+                                    roundedBitmapDrawable.setCircular(true);
                                     SimpleDateFormat format = new SimpleDateFormat("HH:MM");
                                     Cursor friendCursor = database.rawQuery("select * from friends where uid=? and friendid=?", new String[]{message.getMToId() + "", message.getMFromId() + ""});
                                     String chatUserName;
@@ -430,7 +457,7 @@ public class MessageService extends Service {
                                     } else {
                                         chatUserName = "未知";
                                     }
-                                    conversationActivity.getAllMessages().get(message.getMFromId()).add(new ChatMessage(photo, chatUserName + "", message.getMContent(), format.format(new Date(message.getMTime())), 1));
+                                    conversationActivity.getAllMessages().get(message.getMFromId()).add(new ChatMessage(roundedBitmapDrawable, chatUserName + "", message.getMContent(), format.format(new Date(message.getMTime())), 1));
                                 }
                                 List<ChatMessage> messages = conversationActivity.getMessages();
                                 //chatting with message sender
@@ -447,11 +474,13 @@ public class MessageService extends Service {
                                 if (photo == null) {
                                     photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
                                 }
+                                RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+                                roundedBitmapDrawable.setCircular(true);
                                 Intent resultIntent = new Intent(MessageService.this, MainActivity.class);
                                 PendingIntent resultPendingIntent = PendingIntent.getActivity(MessageService.this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                                 NotificationCompat.Builder builder = new NotificationCompat.Builder(MessageService.this, "highChannel");
                                 builder.setSmallIcon(R.drawable.ty);
-                                builder.setLargeIcon(photo);
+                                builder.setLargeIcon(ImageUtil.drawToBitmap(roundedBitmapDrawable));
                                 builder.setContentText(message.getMContent());
                                 builder.setContentTitle(message.getMFromId() + "");
                                 builder.setContentIntent(resultPendingIntent);
@@ -524,20 +553,22 @@ public class MessageService extends Service {
                         Log.e("MessageService", "File is not exist");
                         return;
                     }
+                    RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+                    roundedBitmapDrawable.setCircular(true);
                     //update MainActivity's photo
                     if (mainActivity != null) {
                         ConversationListItemAdapter conversationListItemAdapter = mainActivity.getConversationListItemAdapter();
                         List<ConversationListItem> conversationList = mainActivity.getConversationList();
                         for (int i = 0; i < conversationList.size(); i++) {
                             if (conversationList.get(i).getUId() == uid) {
-                                conversationList.get(i).setImage(photo);
+                                conversationList.get(i).setImage(roundedBitmapDrawable);
                                 conversationListItemAdapter.notifyItemChanged(i);
                                 break;
                             }
                         }
                         if (uid == currentUserId) {
                             ImageView headerPhotoView = mainActivity.getHeaderView().findViewById(R.id.navigation_photo_header);
-                            headerPhotoView.setImageBitmap(photo);
+                            headerPhotoView.setImageDrawable(roundedBitmapDrawable);
                         }
                     }
                     //update ConversationActivity's photo
@@ -545,10 +576,10 @@ public class MessageService extends Service {
                         if (conversationActivity.getChatUserId() == uid) {
                             for (int i = 0; i < conversationActivity.getMessages().size(); i++) {
                                 if (conversationActivity.getMessages().get(i).getType() == 0 && uid != currentUserId) {
-                                    conversationActivity.getMessages().get(i).setTouxiang(photo);
+                                    conversationActivity.getMessages().get(i).setTouxiang(roundedBitmapDrawable);
                                 }
                                 if (conversationActivity.getMessages().get(i).getType() != 0 && uid == currentUserId) {
-                                    conversationActivity.getMessages().get(i).setTouxiang(photo);
+                                    conversationActivity.getMessages().get(i).setTouxiang(roundedBitmapDrawable);
                                 }
                             }
                             conversationActivity.getAdapter().notifyDataSetChanged();

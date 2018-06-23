@@ -7,6 +7,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -128,8 +130,10 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
                 if (userPhoto == null) {
                     userPhoto = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
                 }
+                RoundedBitmapDrawable userRoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, userPhoto);
+                userRoundedBitmapDrawable.setCircular(true);
                 SimpleDateFormat format = new SimpleDateFormat("HH:MM");
-                ChatMessage newMessage = new ChatMessage(userPhoto, currentUserName, messagetext.getText() + "", format.format(new Date(message.getMTime())), 0);
+                ChatMessage newMessage = new ChatMessage(userRoundedBitmapDrawable, currentUserName, messagetext.getText() + "", format.format(new Date(message.getMTime())), 0);
                 messagetext.setText("");
                 messages.add(newMessage);
                 adapter.notifyDataSetChanged();
@@ -162,17 +166,21 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
             if (photo == null) {
                 photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
             }
+            RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+            roundedBitmapDrawable.setCircular(true);
             if (userPhoto == null) {
                 userPhoto = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
             }
+            RoundedBitmapDrawable userRoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, userPhoto);
+            userRoundedBitmapDrawable.setCircular(true);
             SimpleDateFormat format = new SimpleDateFormat("HH:MM");
             String mcontent = message.getString(message.getColumnIndex("mcontent"));
             Long mtime = message.getLong(message.getColumnIndex("Mtime"));
             int fromid = message.getInt(message.getColumnIndex("Fromid"));
             if (fromid == currentUserId) {
-                messages.add(new ChatMessage(userPhoto, currentUserName + "", mcontent, format.format(new Date(mtime)), 0));
+                messages.add(new ChatMessage(userRoundedBitmapDrawable, currentUserName + "", mcontent, format.format(new Date(mtime)), 0));
             } else {
-                messages.add(new ChatMessage(photo, chatUserName + "", mcontent, format.format(new Date(mtime)), 1));
+                messages.add(new ChatMessage(roundedBitmapDrawable, chatUserName + "", mcontent, format.format(new Date(mtime)), 1));
             }
         }
         message.close();

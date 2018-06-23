@@ -17,7 +17,9 @@
             android:layout_height="wrap_content"
             android:src="@drawable/logo"
             android:layout_gravity="center"
-            android:contentDescription="@string/image_description" />
+            android:contentDescription="@string/image_description"
+            android:scaleType="fitXY"
+            android:background="#00000000" />
 
         <EditText
             android:id="@+id/register_account_edittext"

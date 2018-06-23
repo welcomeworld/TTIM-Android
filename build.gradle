@@ -35,4 +35,5 @@ dependencies {
     implementation 'com.google.protobuf:protobuf-java:3.5.0'
     // https://mvnrepository.com/artifact/com.android.support/design
     implementation 'com.android.support:design:26.1.0'
+    implementation 'com.github.florent37:diagonallayout:1.0.7'
 }

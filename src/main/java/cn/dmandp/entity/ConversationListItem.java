@@ -1,6 +1,7 @@
 package cn.dmandp.entity;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 
 /**
  * Created by 萌即正义 on 14/03/2018.
@@ -11,10 +12,10 @@ public class ConversationListItem {
     private String message;
     private String time;
     private String newMessage;
-    private Bitmap image;
+    private Drawable image;
     private int uId;
 
-    public ConversationListItem(int uId, String username, String message, String time, String newMessage, Bitmap image) {
+    public ConversationListItem(int uId, String username, String message, String time, String newMessage, Drawable image) {
         this.uId = uId;
         this.username = username;
         this.message = message;
@@ -39,7 +40,7 @@ public class ConversationListItem {
         this.newMessage = newMessage;
     }
 
-    public void setImage(Bitmap image) {
+    public void setImage(Drawable image) {
         this.image = image;
     }
 
@@ -55,7 +56,7 @@ public class ConversationListItem {
         return time;
     }
 
-    public Bitmap getImage() {
+    public Drawable getImage() {
         return image;
     }
 

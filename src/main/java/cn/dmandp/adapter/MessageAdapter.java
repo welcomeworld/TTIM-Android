@@ -52,14 +52,14 @@ public class MessageAdapter extends ArrayAdapter<ChatMessage> {
         if (chatMessage.getType() == 0) {
             viewHolder.leftLayout.setVisibility(View.GONE);
             viewHolder.rightLayout.setVisibility(View.VISIBLE);
-            viewHolder.righttouxiang.setImageBitmap(chatMessage.getTouxiang());
+            viewHolder.righttouxiang.setImageDrawable(chatMessage.getTouxiang());
             viewHolder.time.setText(chatMessage.getTime() + "");
             viewHolder.rightusername.setText(chatMessage.getName());
             viewHolder.rightcontent.setText(chatMessage.getMessage());
         } else {
             viewHolder.leftLayout.setVisibility(View.VISIBLE);
             viewHolder.rightLayout.setVisibility(View.GONE);
-            viewHolder.lefttouxiang.setImageBitmap(chatMessage.getTouxiang());
+            viewHolder.lefttouxiang.setImageDrawable(chatMessage.getTouxiang());
             viewHolder.time.setText(chatMessage.getTime() + "");
             viewHolder.leftusername.setText(chatMessage.getName());
             viewHolder.leftcontent.setText(chatMessage.getMessage());

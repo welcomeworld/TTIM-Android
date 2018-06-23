@@ -1,19 +1,20 @@
 package cn.dmandp.entity;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 
 /**
  * Created by 萌即正义 on 16/03/2018.
  */
 
 public class ChatMessage {
-    private Bitmap touxiang;
+    private Drawable touxiang;
     private String name;
     private String message;
     private String time;
     private int type;
 
-    public ChatMessage(Bitmap touxiang, String name, String message, String time, int type) {
+    public ChatMessage(Drawable touxiang, String name, String message, String time, int type) {
         this.touxiang = touxiang;
         this.name = name;
         this.message = message;
@@ -21,11 +22,11 @@ public class ChatMessage {
         this.type = type;
     }
 
-    public Bitmap getTouxiang() {
+    public Drawable getTouxiang() {
         return touxiang;
     }
 
-    public void setTouxiang(Bitmap touxiang) {
+    public void setTouxiang(Drawable touxiang) {
         this.touxiang = touxiang;
     }
 

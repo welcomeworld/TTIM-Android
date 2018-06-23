@@ -20,6 +20,8 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.os.Bundle;
@@ -32,6 +34,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -64,6 +67,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private TTIMDaoHelper daoHelper = new TTIMDaoHelper(this);
     private SQLiteDatabase database;
     private int currentUserId;
+    private String currentUserName;
 
     public List<ConversationListItem> getConversationList() {
         return conversationList;
@@ -92,7 +96,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         database = daoHelper.getReadableDatabase();
-        String uName = "未登录";
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //start service
@@ -102,7 +105,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         sessionContext = ((TtApplication) getApplication()).getSessionContext();
         SharedPreferences data = getSharedPreferences("data", MODE_PRIVATE);
         currentUserId = data.getInt("currentUserId", -1);
-        uName = data.getString("currentUserName", "未登录");
+        currentUserName = data.getString("currentUserName", "未登录");
         if (!sessionContext.isLogin()) {
             if (currentUserId == -1) {
                 //SharedPreferences save nothing so go to LoginActivity
@@ -129,11 +132,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.menu_main_add:
-                        Intent intent = new Intent();
-                        intent.setAction(Intent.ACTION_GET_CONTENT);
-                        intent.setType("image/png");
-                        intent.addCategory(Intent.CATEGORY_OPENABLE);
-                        startActivityForResult(Intent.createChooser(intent, "请选择你的头像文件"), 1);
                         break;
                     case R.id.menu_main_scan:
                         Toast.makeText(MainActivity.this, "your click the scan!", Toast.LENGTH_SHORT).show();
@@ -193,7 +191,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         });
         headerView = navigationView.inflateHeaderView(R.layout.navigation_header_main);
         TextView nameText = headerView.findViewById(R.id.navigation_name_header);
-        nameText.setText(uName);
+        nameText.setText(currentUserName);
+        ImageButton headerPhotoView = headerView.findViewById(R.id.navigation_photo_header);
+        headerPhotoView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent personInfoIntent = new Intent(MainActivity.this, PersonInfoActivity.class);
+                personInfoIntent.putExtra("uId", currentUserId);
+                personInfoIntent.putExtra("uName", currentUserName);
+                startActivity(personInfoIntent);
+            }
+        });
         //-----NavigationView initialization end
         //recyclerView initialization
         recyclerView = findViewById(R.id.main_recyclerview);
@@ -232,33 +240,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @Override
     public void onClick(View v) {
 
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == Activity.RESULT_OK) {
-            Uri uri = data.getData();
-            String url;
-            url = uri.getPath();
-
-            Uri selectedImage = data.getData();
-            String picturePath = null;
-            try {
-                String[] filePathColumns = {MediaStore.Images.Media.DATA};
-                Cursor c = this.getContentResolver().query(selectedImage, filePathColumns, null, null, null);
-                c.moveToFirst();
-                int columnIndex = c.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);//getColumnIndex(filePathColumns[0]);
-                picturePath = c.getString(columnIndex);
-                c.close();
-            } catch (Exception e) {
-                picturePath = selectedImage.getPath();
-            }
-            if (picturePath != null) {
-                Toast.makeText(this, picturePath, Toast.LENGTH_LONG).show();
-            }
-
-
-        }
     }
 
     @Override
@@ -338,17 +319,19 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             int friendid = cursor.getInt(cursor.getColumnIndex("friendid"));
             int messagecount = messagePreferences.getInt(friendid + ":" + currentUserId, -1);
             String uname = cursor.getString(cursor.getColumnIndex("Uname"));
-            Cursor message = database.rawQuery("select * from messages where (Fromid=? and Toid=?) and (Fromid=? and Toid=?) order by Mtime desc limit 1", new String[]{friendid + "", currentUserId + "", currentUserId + "", friendid + ""});
+            Cursor message = database.rawQuery("select * from messages where (Fromid=? and Toid=?) or (Fromid=? and Toid=?) order by Mtime desc limit 1", new String[]{friendid + "", currentUserId + "", currentUserId + "", friendid + ""});
             if (messagecount != -1 && message.moveToNext()) {
                 Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + friendid + ".png");
                 if (photo == null) {
                     photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
                     Log.e("MainActivity", "do not have file" + friendid + ".png");
                 }
+                RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+                roundedBitmapDrawable.setCircular(true);
                 SimpleDateFormat format = new SimpleDateFormat("HH:MM");
                 String mcontent = message.getString(message.getColumnIndex("mcontent"));
                 Long mtime = message.getLong(message.getColumnIndex("Mtime"));
-                conversationList.add(new ConversationListItem(friendid, uname, mcontent, format.format(new Date(mtime)), messagecount + "", photo));
+                conversationList.add(new ConversationListItem(friendid, uname, mcontent, format.format(new Date(mtime)), messagecount + "", roundedBitmapDrawable));
             }
         }
         Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + currentUserId + ".png");
@@ -356,8 +339,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
             Log.e("MainActivity", "do not have file" + currentUserId + ".png");
         }
-        ImageView headerPhotoView = headerView.findViewById(R.id.navigation_photo_header);
-        headerPhotoView.setImageBitmap(photo);
+        RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+        roundedBitmapDrawable.setCircular(true);
+        ImageButton headerPhotoView = headerView.findViewById(R.id.navigation_photo_header);
+        headerPhotoView.setImageDrawable(roundedBitmapDrawable);
     }
 
 }

@@ -39,7 +39,7 @@ public class ConversationListItemAdapter extends RecyclerView.Adapter<Conversati
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         final ConversationListItem currentView = recycleViewData.get(position);
-        holder.imageView.setImageBitmap(currentView.getImage());
+        holder.imageView.setImageDrawable(currentView.getImage());
         holder.userTextView.setText(currentView.getUsername());
         holder.messageTextView.setText(currentView.getMessage());
         holder.timeTextView.setText(currentView.getTime());

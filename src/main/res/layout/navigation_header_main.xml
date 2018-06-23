@@ -6,7 +6,7 @@
     android:background="@color/colorPrimary"
     android:orientation="vertical">
 
-    <ImageView
+    <ImageButton
         android:id="@+id/navigation_photo_header"
         android:layout_marginTop="8dp"
         android:layout_marginLeft="8dp"
@@ -14,7 +14,10 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:src="@drawable/logo"
-        android:contentDescription="@string/image_description" />
+        android:contentDescription="@string/image_description"
+        android:scaleType="fitXY"
+        android:padding="0dp"
+        android:background="#00000000" />
 
     <TextView
         android:id="@+id/navigation_name_header"
