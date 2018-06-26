@@ -17,11 +17,14 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.os.Bundle;
@@ -32,7 +35,9 @@ import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -49,6 +54,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import cn.dmandp.adapter.FriendRecyclerViewItemAdapter;
+import cn.dmandp.adapter.MyViewPagerAdapter;
 import cn.dmandp.common.MyDividerItemDecoration;
 import cn.dmandp.common.TYPE;
 import cn.dmandp.dao.TTIMDaoHelper;
@@ -56,11 +63,13 @@ import cn.dmandp.entity.ConversationListItem;
 import cn.dmandp.adapter.ConversationListItemAdapter;
 import cn.dmandp.context.SessionContext;
 import cn.dmandp.context.TtApplication;
+import cn.dmandp.entity.FriendRecyclerViewItem;
 import cn.dmandp.entity.TTUser;
 import cn.dmandp.netio.FileThread;
 import cn.dmandp.netio.Result;
 import cn.dmandp.service.MessageService;
 import cn.dmandp.view.LoadView;
+import cn.dmandp.view.MyViewPager;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener {
     private SessionContext sessionContext;
@@ -68,6 +77,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private SQLiteDatabase database;
     private int currentUserId;
     private String currentUserName;
+    ArrayList<View> viewContainter = new ArrayList<View>();
 
     public List<ConversationListItem> getConversationList() {
         return conversationList;
@@ -75,15 +85,31 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     private List<ConversationListItem> conversationList = new ArrayList<ConversationListItem>();
 
+    public ArrayList<FriendRecyclerViewItem> getFriendRecyclerViewData() {
+        return friendRecyclerViewData;
+    }
+
+    private ArrayList<FriendRecyclerViewItem> friendRecyclerViewData = new ArrayList<FriendRecyclerViewItem>();
     public ConversationListItemAdapter getConversationListItemAdapter() {
         return conversationListItemAdapter;
     }
 
     private ConversationListItemAdapter conversationListItemAdapter;
+
+    public FriendRecyclerViewItemAdapter getFriendRecyclerViewItemAdapter() {
+        return friendRecyclerViewItemAdapter;
+    }
+
+    private FriendRecyclerViewItemAdapter friendRecyclerViewItemAdapter;
+
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
+    private AppBarLayout appBarLayout;
     private ActionBarDrawerToggle drawerToggle;
     private RecyclerView recyclerView;
+    private RecyclerView friendListView;
+    private MyViewPager viewPager;
+    private BottomNavigationView bottomNavigationView;
     LoadView loadView;
 
     public View getHeaderView() {
@@ -119,6 +145,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 new MainTask().execute(currentUserId + "", currentUserPassword);
             }
         }
+
         //View initialization
         loadView = findViewById(R.id.main_loadview);
 
@@ -144,6 +171,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         });
         //display toolbar item icon
         ((MenuBuilder) toolbar.getMenu()).setOptionalIconsVisible(true);
+
         //-----toolbar initialization end
         drawerToggle = new ActionBarDrawerToggle(MainActivity.this, drawerLayout, toolbar, R.string.openDrawer, R.string.closeDrawer) {
         };
@@ -203,12 +231,61 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             }
         });
         //-----NavigationView initialization end
-        //recyclerView initialization
-        recyclerView = findViewById(R.id.main_recyclerview);
+
+        //BottomNavigation initialization start
+        bottomNavigationView = findViewById(R.id.main_bottom_navigation);
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.bottom_navigation_menu_message:
+                        viewPager.setCurrentItem(0);
+                        break;
+                    case R.id.bottom_navigation_menu_friend:
+                        viewPager.setCurrentItem(1);
+                        break;
+                    case R.id.bottom_navigation_menu_favorite:
+                        viewPager.setCurrentItem(2);
+                        break;
+                }
+                return true;
+            }
+        });
+        //BottomNavigation initialization end
+
+        //-----viewpager initialization start
+        viewPager = findViewById(R.id.main_viewpager);
+        View messageView = LayoutInflater.from(this).inflate(R.layout.viewpager_main_message, null);
+        View friendView = LayoutInflater.from(this).inflate(R.layout.viewpager_main_friend, null);
+        View favoriteView = LayoutInflater.from(this).inflate(R.layout.viewpager_main_friend, null);
+        viewContainter.add(messageView);
+        viewContainter.add(friendView);
+        viewContainter.add(favoriteView);
+        MyViewPagerAdapter viewPagerAdapter = new MyViewPagerAdapter(viewContainter);
+        viewPager.setAdapter(viewPagerAdapter);
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                bottomNavigationView.getMenu().getItem(position).setChecked(true);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+        //-----viewpager initialization end
+
+        //message recyclerView initialization
+        recyclerView = messageView.findViewById(R.id.viewpager_message_recyclerview);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(MainActivity.this);
         recyclerView.setLayoutManager(linearLayoutManager);
         linearLayoutManager.setOrientation(OrientationHelper.VERTICAL);
-        dataInit();
         conversationListItemAdapter = new ConversationListItemAdapter(conversationList);
         conversationListItemAdapter.setOnItemClickListener(new ConversationListItemAdapter.OnItemClickListener() {
             @Override
@@ -235,6 +312,57 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         recyclerView.setAdapter(conversationListItemAdapter);
         recyclerView.addItemDecoration(new MyDividerItemDecoration());
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+        //messageRecyclerView initialization end
+
+        //friendRecyclerView initialization start
+        friendListView = friendView.findViewById(R.id.viewpager_friend_recyclerview);
+        LinearLayoutManager friendLinearLayoutManager = new LinearLayoutManager(MainActivity.this);
+        friendListView.setLayoutManager(friendLinearLayoutManager);
+        friendLinearLayoutManager.setOrientation(OrientationHelper.VERTICAL);
+        friendRecyclerViewItemAdapter = new FriendRecyclerViewItemAdapter(friendRecyclerViewData);
+        friendRecyclerViewItemAdapter.setOnItemClickListener(new FriendRecyclerViewItemAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int uId) {
+                Intent intent = new Intent(MainActivity.this, ConversationActivity.class);
+                intent.putExtra("uId", uId);
+                startActivity(intent);
+                SharedPreferences messageSharedPreferences = getSharedPreferences("message", MODE_PRIVATE);
+                SharedPreferences.Editor editor = messageSharedPreferences.edit();
+                int messageCount = messageSharedPreferences.getInt(uId + ":" + currentUserId, -1);
+                editor.putInt(uId + ":" + currentUserId, 0);
+                editor.commit();
+                if (messageCount != -1) {
+                    for (ConversationListItem item : conversationList) {
+                        if (item.getUId() == uId) {
+                            item.setNewMessage("0");
+                            conversationListItemAdapter.notifyItemChanged(conversationList.indexOf(item));
+                            break;
+                        }
+                    }
+                } else {
+                    //new conversationListItem
+                    Cursor cursor = database.rawQuery("select * from friends where uid=? and friendid=?", new String[]{currentUserId + "", uId + ""});
+                    if (cursor.moveToNext()) {
+                        Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + uId + ".png");
+                        if (photo == null) {
+                            photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                            Log.e("MainActivity", "do not have file" + uId + ".png");
+                        }
+                        RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+                        roundedBitmapDrawable.setCircular(true);
+                        SimpleDateFormat format = new SimpleDateFormat("HH:mm");
+                        conversationList.add(0, new ConversationListItem(uId, cursor.getString(cursor.getColumnIndex("Uname")), "", format.format(new Date(System.currentTimeMillis())), 0 + "", roundedBitmapDrawable));
+                        conversationListItemAdapter.notifyItemInserted(0);
+                    }
+                }
+            }
+        });
+        friendListView.setAdapter(friendRecyclerViewItemAdapter);
+        friendListView.addItemDecoration(new MyDividerItemDecoration());
+        friendListView.setItemAnimator(new DefaultItemAnimator());
+
+        //friendRecyclerView initialization end
+        dataInit();
     }
 
     @Override
@@ -319,21 +447,23 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             int friendid = cursor.getInt(cursor.getColumnIndex("friendid"));
             int messagecount = messagePreferences.getInt(friendid + ":" + currentUserId, -1);
             String uname = cursor.getString(cursor.getColumnIndex("Uname"));
+            Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + friendid + ".png");
+            if (photo == null) {
+                photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                Log.e("MainActivity", "do not have file" + friendid + ".png");
+            }
+            RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+            roundedBitmapDrawable.setCircular(true);
+            friendRecyclerViewData.add(new FriendRecyclerViewItem(friendid, roundedBitmapDrawable, null, uname));
             Cursor message = database.rawQuery("select * from messages where (Fromid=? and Toid=?) or (Fromid=? and Toid=?) order by Mtime desc limit 1", new String[]{friendid + "", currentUserId + "", currentUserId + "", friendid + ""});
             if (messagecount != -1 && message.moveToNext()) {
-                Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + friendid + ".png");
-                if (photo == null) {
-                    photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
-                    Log.e("MainActivity", "do not have file" + friendid + ".png");
-                }
-                RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
-                roundedBitmapDrawable.setCircular(true);
-                SimpleDateFormat format = new SimpleDateFormat("HH:MM");
+                SimpleDateFormat format = new SimpleDateFormat("HH:mm");
                 String mcontent = message.getString(message.getColumnIndex("mcontent"));
                 Long mtime = message.getLong(message.getColumnIndex("Mtime"));
                 conversationList.add(new ConversationListItem(friendid, uname, mcontent, format.format(new Date(mtime)), messagecount + "", roundedBitmapDrawable));
             }
         }
+        friendRecyclerViewItemAdapter.notifyDataSetChanged();
         Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + currentUserId + ".png");
         if (photo == null) {
             photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);

@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/navigation_menu_item_favorite"
-        android:title="@string/favorite"
-        android:icon="@mipmap/ic_launcher" />
-    <item
         android:id="@+id/navigation_menu_item_settings"
         android:title="@string/setting"
+        android:icon="@mipmap/ic_launcher" />
+    <item
+        android:id="@+id/navigation_menu_item_theme"
+        android:title="@string/theme"
+        android:icon="@mipmap/ic_launcher" />
+    <item
+        android:id="@+id/navigation_menu_item_advertisement"
+        android:title="@string/advertisement"
         android:icon="@mipmap/ic_launcher" />
     <group android:id="@+id/version_group">
         <item

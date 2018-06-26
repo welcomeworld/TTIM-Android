@@ -26,4 +26,7 @@
     <string name="message_count_text">99</string>
     <string name="add_friends">添加好友</string>
     <string name="scan">扫一扫</string>
+    <string name="theme">主题</string>
+    <string name="advertisement">广告推广</string>
+    <string name="friends">好友</string>
 </resources>

@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 27
     defaultConfig {
         applicationId "cn.dmandp.tt"
         minSdkVersion 14
         //noinspection OldTargetApi
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
@@ -34,6 +34,7 @@ dependencies {
     implementation 'com.android.support:multidex:1.0.3'
     implementation 'com.google.protobuf:protobuf-java:3.5.0'
     // https://mvnrepository.com/artifact/com.android.support/design
-    implementation 'com.android.support:design:26.1.0'
+    implementation 'com.android.support:design:27.1.1'
+    implementation'com.android.support:cardview-v7:27.1.1'
     implementation 'com.github.florent37:diagonallayout:1.0.7'
 }

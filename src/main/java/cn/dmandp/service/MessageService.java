@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.List;
 
 import cn.dmandp.adapter.ConversationListItemAdapter;
+import cn.dmandp.adapter.FriendRecyclerViewItemAdapter;
 import cn.dmandp.common.Const;
 import cn.dmandp.common.OprateOptions;
 import cn.dmandp.common.RESP_CODE;
@@ -46,6 +47,7 @@ import cn.dmandp.context.TtApplication;
 import cn.dmandp.dao.TTIMDaoHelper;
 import cn.dmandp.entity.ChatMessage;
 import cn.dmandp.entity.ConversationListItem;
+import cn.dmandp.entity.FriendRecyclerViewItem;
 import cn.dmandp.entity.TTIMPacket;
 import cn.dmandp.entity.TTMessage;
 import cn.dmandp.entity.TTUser;
@@ -239,38 +241,46 @@ public class MessageService extends Service {
                     }
                     byte[] user = new byte[body.length - 1];
                     System.arraycopy(body, 1, user, 0, user.length);
-                    //have been login so do nothing
-                    if (sessionContext.isLogin()) {
-                        Log.e("TTIM-MessageService", "User have been login");
+                    if (body[0] != RESP_CODE.SUCCESS) {
+                        //Login fail
+                        if (loginActivity == null) {
+                            Intent loginIntent = new Intent(MessageService.this, LoginActivity.class);
+                            loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(loginIntent);
+                            Toast.makeText(MessageService.this, new String(user), Toast.LENGTH_SHORT).show();
+                            break;
+                        }
+                        if (loginActivity.isForeground()) {
+                            Toast.makeText(loginActivity, new String(user), Toast.LENGTH_SHORT).show();
+                            loginActivity.loadView.setVisibility(View.GONE);
+                        }
                         break;
-                    }
-                    Intent intent = new Intent("cn.dmandp.tt.action.MAINACTIVITY");
-                    //LoginActivity have been destroyed
-                    if (loginActivity == null) {
-                        if (mainActivity != null) {
-                            TTUser currentUser = null;
-                            try {
-                                TTUser responseuser = TTUser.parseFrom(user);
-                                TTUser.Builder builder = TTUser.newBuilder(responseuser);
-                                builder.setUPassword((String) sessionContext.getAttribute("loginpassword"));
-                                currentUser = builder.build();
-                            } catch (InvalidProtocolBufferException e) {
-                                e.printStackTrace();
-                                break;
-                            }
-                            //save currentUserId and currentUserPassword in SharedPreferences
-                            SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
-                            editor.putInt("currentUserId", currentUser.getUId());
-                            editor.putString("currentUserPassword", currentUser.getUPassword());
-                            editor.putString("currentUserName", currentUser.getUName());
-                            editor.commit();
-                            //get friends info from server
-                            List<Integer> friendlist = currentUser.getUFriendsList();
-                            for (int friendid : friendlist) {
-                                Cursor friendCursor = database.rawQuery("select * from friends where uid=? and friendid=?", new String[]{currentUser.getUId() + "", friendid + ""});
-                                if (friendCursor.moveToNext()) {
-                                    continue;
-                                } else {
+                    } else {
+
+                        //Login is successful
+                        Intent intent = new Intent("cn.dmandp.tt.action.MAINACTIVITY");
+                        //LoginActivity have been destroyed
+                        if (loginActivity == null) {
+                            if (mainActivity != null) {
+                                TTUser currentUser = null;
+                                try {
+                                    TTUser responseuser = TTUser.parseFrom(user);
+                                    TTUser.Builder builder = TTUser.newBuilder(responseuser);
+                                    builder.setUPassword((String) sessionContext.getAttribute("loginpassword"));
+                                    currentUser = builder.build();
+                                } catch (InvalidProtocolBufferException e) {
+                                    e.printStackTrace();
+                                    break;
+                                }
+                                //save currentUserId and currentUserPassword in SharedPreferences
+                                SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
+                                editor.putInt("currentUserId", currentUser.getUId());
+                                editor.putString("currentUserPassword", currentUser.getUPassword());
+                                editor.putString("currentUserName", currentUser.getUName());
+                                editor.commit();
+                                //get friends info from server
+                                List<Integer> friendlist = currentUser.getUFriendsList();
+                                for (int friendid : friendlist) {
                                     TTIMPacket friendpacket = new TTIMPacket();
                                     friendpacket.setTYPE(TYPE.USERINFO_REQ);
                                     ByteBuffer friendByteBuffer = ByteBuffer.allocate(50);
@@ -285,33 +295,23 @@ public class MessageService extends Service {
                                     fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
                                     new FileThread(MessageService.this, fileBundle, handler).start();
                                 }
+                                //save login status(id and user bean) in sessionContext
+                                sessionContext.setLogin(true);
+                                sessionContext.setuID(currentUser.getUId());
+                                sessionContext.setBindUser(currentUser);
+                                TTIMPacket packet = new TTIMPacket();
+                                packet.setTYPE(TYPE.RECEIVE_REQ);
+                                byte[] receivebody = {1};
+                                packet.setBodylength(receivebody.length);
+                                packet.setBody(receivebody);
+                                TtApplication.send(packet);
+                                Bundle fileBundle = new Bundle();
+                                fileBundle.putInt("uid", currentUser.getUId());
+                                fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
+                                new FileThread(MessageService.this, fileBundle, handler).start();
                             }
-                            //save login status(id and user bean) in sessionContext
-                            sessionContext.setLogin(true);
-                            sessionContext.setuID(currentUser.getUId());
-                            sessionContext.setBindUser(currentUser);
-                            TTIMPacket packet = new TTIMPacket();
-                            packet.setTYPE(TYPE.RECEIVE_REQ);
-                            byte[] receivebody = {1};
-                            packet.setBodylength(receivebody.length);
-                            packet.setBody(receivebody);
-                            TtApplication.send(packet);
-                            Bundle fileBundle = new Bundle();
-                            fileBundle.putInt("uid", currentUser.getUId());
-                            fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
-                            new FileThread(MessageService.this, fileBundle, handler).start();
+                            break;
                         }
-                        break;
-                    }
-                    if (body[0] != RESP_CODE.SUCCESS) {
-                        //Login fail
-                        if (loginActivity.isForeground()) {
-                            Toast.makeText(loginActivity, new String(user), Toast.LENGTH_SHORT).show();
-                            loginActivity.loadView.setVisibility(View.GONE);
-                        }
-                        break;
-                    } else {
-                        //Login is successful
                         TTUser currentUser = null;
                         try {
                             TTUser responseuser = TTUser.parseFrom(user);
@@ -331,10 +331,6 @@ public class MessageService extends Service {
                         //get friends info from server
                         List<Integer> friendlist = currentUser.getUFriendsList();
                         for (int friendid : friendlist) {
-                            Cursor friendCursor = database.rawQuery("select * from friends where uid=? and friendid=?", new String[]{currentUser.getUId() + "", friendid + ""});
-                            if (friendCursor.moveToNext()) {
-                                continue;
-                            } else {
                                 TTIMPacket friendpacket = new TTIMPacket();
                                 friendpacket.setTYPE(TYPE.USERINFO_REQ);
                                 ByteBuffer friendByteBuffer = ByteBuffer.allocate(50);
@@ -348,7 +344,6 @@ public class MessageService extends Service {
                                 fileBundle.putInt("uid", friendid);
                                 fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
                                 new FileThread(MessageService.this, fileBundle, handler).start();
-                            }
                         }
                         //save login status(id and user bean) in sessionContext
                         sessionContext.setLogin(true);
@@ -395,6 +390,7 @@ public class MessageService extends Service {
                             SharedPreferences messagePreferences = getSharedPreferences("message", MODE_PRIVATE);
                             SharedPreferences.Editor messageEditor = messagePreferences.edit();
                             int messageCount = messagePreferences.getInt(message.getMFromId() + ":" + message.getMToId(), -1);
+                            //update mainActivity UI
                             if (mainActivity != null) {
                                 ConversationListItemAdapter conversationListItemAdapter = mainActivity.getConversationListItemAdapter();
                                 List<ConversationListItem> conversationList = mainActivity.getConversationList();
@@ -411,7 +407,7 @@ public class MessageService extends Service {
                                     }
                                     RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
                                     roundedBitmapDrawable.setCircular(true);
-                                    SimpleDateFormat format = new SimpleDateFormat("HH:MM");
+                                    SimpleDateFormat format = new SimpleDateFormat("HH:mm");
                                     ConversationListItem friend = new ConversationListItem(message.getMFromId(), username, message.getMContent(), format.format(new Date(message.getMTime())), 1 + "", roundedBitmapDrawable);
                                     conversationList.add(0, friend);
                                     messageEditor.putInt(message.getMFromId() + ":" + message.getMToId(), 1);
@@ -420,7 +416,7 @@ public class MessageService extends Service {
                                 //in message list now
                                 for (int i = 0; i < conversationList.size(); i++) {
                                     if (conversationList.get(i).getUId() == message.getMFromId()) {
-                                        SimpleDateFormat format = new SimpleDateFormat("HH:MM");
+                                        SimpleDateFormat format = new SimpleDateFormat("HH:mm");
                                         if (conversationActivity != null && conversationActivity.isForeground() && conversationActivity.getChatUserId() == message.getMFromId()) {
                                             conversationList.get(i).setNewMessage(0 + "");
                                             messageEditor.putInt(message.getMFromId() + ":" + message.getMToId(), 0);
@@ -440,7 +436,7 @@ public class MessageService extends Service {
                                 }
                                 messageEditor.commit();
                             }
-                            //is chatting
+                            ////update mainActivity UI
                             if (conversationActivity != null) {
                                 if (conversationActivity.getAllMessages().get(message.getMFromId()) != null) {
                                     Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + message.getMFromId() + ".png");
@@ -449,7 +445,7 @@ public class MessageService extends Service {
                                     }
                                     RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
                                     roundedBitmapDrawable.setCircular(true);
-                                    SimpleDateFormat format = new SimpleDateFormat("HH:MM");
+                                    SimpleDateFormat format = new SimpleDateFormat("HH:mm");
                                     Cursor friendCursor = database.rawQuery("select * from friends where uid=? and friendid=?", new String[]{message.getMToId() + "", message.getMFromId() + ""});
                                     String chatUserName;
                                     if (friendCursor.moveToNext()) {
@@ -506,9 +502,14 @@ public class MessageService extends Service {
                             System.arraycopy(body, 2, userbody, 0, userbody.length);
                             try {
                                 TTUser getUser = TTUser.parseFrom(userbody);
-                                database.execSQL("insert into friends values(?,?,?)", new String[]{sessionContext.getuID() + "", getUser.getUId() + "", getUser.getUName()});
-                                //change mainActivity
+                                try {
+                                    database.execSQL("insert into friends values(?,?,?)", new String[]{sessionContext.getuID() + "", getUser.getUId() + "", getUser.getUName()});
+                                } catch (SQLiteConstraintException sc) {
+                                    database.execSQL("update friends set uname=? where uid=? and friendid=?", new String[]{getUser.getUName(), sessionContext.getuID() + "", getUser.getUId() + ""});
+                                }
+                                //update mainActivity UI
                                 if (mainActivity != null) {
+                                    //update conversationList
                                     ConversationListItemAdapter conversationListItemAdapter = mainActivity.getConversationListItemAdapter();
                                     List<ConversationListItem> conversationList = mainActivity.getConversationList();
                                     for (int i = 0; i < conversationList.size(); i++) {
@@ -520,8 +521,20 @@ public class MessageService extends Service {
                                             break;
                                         }
                                     }
+                                    //update friendList
+                                    FriendRecyclerViewItemAdapter friendRecyclerViewItemAdapter = mainActivity.getFriendRecyclerViewItemAdapter();
+                                    List<FriendRecyclerViewItem> friendRecyclerViewItemList = mainActivity.getFriendRecyclerViewData();
+                                    for (int i = 0; i < friendRecyclerViewItemList.size(); i++) {
+                                        if (friendRecyclerViewItemList.get(i).getUId() == getUser.getUId()) {
+                                            if (friendRecyclerViewItemList.get(i).getUsername() != getUser.getUName()) {
+                                                friendRecyclerViewItemList.get(i).setUsername(getUser.getUName());
+                                                friendRecyclerViewItemAdapter.notifyItemChanged(i);
+                                            }
+                                            break;
+                                        }
+                                    }
                                 }
-                                //change conversationActivity
+                                //update conversationActivity UI
                                 if (conversationActivity != null) {
                                     if (conversationActivity.getChatUserId() == getUser.getUId()) {
                                         if (conversationActivity.getChatUserName() != getUser.getUName()) {
@@ -536,7 +549,7 @@ public class MessageService extends Service {
                                     }
                                 }
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                Log.e(TAG, e.getMessage() + e.getClass().getSimpleName());
                             }
                         }
                     }
@@ -557,25 +570,51 @@ public class MessageService extends Service {
                     roundedBitmapDrawable.setCircular(true);
                     //update MainActivity's photo
                     if (mainActivity != null) {
-                        ConversationListItemAdapter conversationListItemAdapter = mainActivity.getConversationListItemAdapter();
-                        List<ConversationListItem> conversationList = mainActivity.getConversationList();
-                        for (int i = 0; i < conversationList.size(); i++) {
-                            if (conversationList.get(i).getUId() == uid) {
-                                conversationList.get(i).setImage(roundedBitmapDrawable);
-                                conversationListItemAdapter.notifyItemChanged(i);
-                                break;
-                            }
-                        }
                         if (uid == currentUserId) {
+                            //update navigation header
                             ImageView headerPhotoView = mainActivity.getHeaderView().findViewById(R.id.navigation_photo_header);
                             headerPhotoView.setImageDrawable(roundedBitmapDrawable);
+                        } else {
+                            //update conversationList
+                            ConversationListItemAdapter conversationListItemAdapter = mainActivity.getConversationListItemAdapter();
+                            List<ConversationListItem> conversationList = mainActivity.getConversationList();
+                            for (int i = 0; i < conversationList.size(); i++) {
+                                if (conversationList.get(i).getUId() == uid) {
+                                    conversationList.get(i).setImage(roundedBitmapDrawable);
+                                    conversationListItemAdapter.notifyItemChanged(i);
+                                    break;
+                                }
+                            }
+                            //update friendList
+                            FriendRecyclerViewItemAdapter friendRecyclerViewItemAdapter = mainActivity.getFriendRecyclerViewItemAdapter();
+                            List<FriendRecyclerViewItem> friendRecyclerViewItemList = mainActivity.getFriendRecyclerViewData();
+                            boolean haveFriend = false;
+                            for (int i = 0; i < friendRecyclerViewItemList.size(); i++) {
+                                if (friendRecyclerViewItemList.get(i).getUId() == uid) {
+                                    haveFriend = true;
+                                    friendRecyclerViewItemList.get(i).setPrimaryImage(roundedBitmapDrawable);
+                                    friendRecyclerViewItemAdapter.notifyItemChanged(i);
+                                    break;
+                                }
+                            }
+                            if (!haveFriend) {
+                                Cursor cursor = database.rawQuery("select * from friends where uid=? and friendid=?", new String[]{currentUserId + "", uid + ""});
+                                if (cursor.moveToNext()) {
+                                    friendRecyclerViewItemList.add(new FriendRecyclerViewItem(uid, roundedBitmapDrawable, null, cursor.getString(cursor.getColumnIndex("Uname"))));
+                                } else {
+                                    friendRecyclerViewItemList.add(new FriendRecyclerViewItem(uid, roundedBitmapDrawable, null, "未知"));
+                                }
+                                cursor.close();
+                                friendRecyclerViewItemAdapter.notifyDataSetChanged();
+                            }
                         }
+
                     }
                     //update ConversationActivity's photo
                     if (conversationActivity != null) {
-                        if (conversationActivity.getChatUserId() == uid) {
+                        if (conversationActivity.getChatUserId() == uid || currentUserId == uid) {
                             for (int i = 0; i < conversationActivity.getMessages().size(); i++) {
-                                if (conversationActivity.getMessages().get(i).getType() == 0 && uid != currentUserId) {
+                                if (conversationActivity.getMessages().get(i).getType() == 0 && uid == conversationActivity.getChatUserId()) {
                                     conversationActivity.getMessages().get(i).setTouxiang(roundedBitmapDrawable);
                                 }
                                 if (conversationActivity.getMessages().get(i).getType() != 0 && uid == currentUserId) {

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import cn.dmandp.adapter.MessageAdapter;
@@ -132,7 +133,7 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
                 }
                 RoundedBitmapDrawable userRoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, userPhoto);
                 userRoundedBitmapDrawable.setCircular(true);
-                SimpleDateFormat format = new SimpleDateFormat("HH:MM");
+                SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.CHINA);
                 ChatMessage newMessage = new ChatMessage(userRoundedBitmapDrawable, currentUserName, messagetext.getText() + "", format.format(new Date(message.getMTime())), 0);
                 messagetext.setText("");
                 messages.add(newMessage);
@@ -173,7 +174,7 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
             }
             RoundedBitmapDrawable userRoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, userPhoto);
             userRoundedBitmapDrawable.setCircular(true);
-            SimpleDateFormat format = new SimpleDateFormat("HH:MM");
+            SimpleDateFormat format = new SimpleDateFormat("HH:mm");
             String mcontent = message.getString(message.getColumnIndex("mcontent"));
             Long mtime = message.getLong(message.getColumnIndex("Mtime"));
             int fromid = message.getInt(message.getColumnIndex("Fromid"));

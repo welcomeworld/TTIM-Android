@@ -42,12 +42,22 @@
             </android.support.design.widget.CollapsingToolbarLayout>
         </android.support.design.widget.AppBarLayout>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/main_recyclerview"
+        <cn.dmandp.view.MyViewPager
+            android:id="@+id/main_viewpager"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"></android.support.v7.widget.RecyclerView>
+            android:layout_height="wrap_content"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"></cn.dmandp.view.MyViewPager>
 
+        <android.support.design.widget.BottomNavigationView
+            style="@style/Widget.Design.BottomNavigationView"
+            android:id="@+id/main_bottom_navigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            app:itemIconTint="@drawable/bottom_navigation_colors"
+            app:itemTextColor="@drawable/bottom_navigation_colors"
+            android:layout_gravity="bottom"
+            app:menu="@menu/bottom_navigation_menu_main" />
     </android.support.design.widget.CoordinatorLayout>
 
     <android.support.design.widget.NavigationView
