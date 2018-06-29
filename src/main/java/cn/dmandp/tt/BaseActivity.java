@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import cn.dmandp.context.SessionContext;
+import cn.dmandp.utils.ThemeUtil;
 
 /**
  * Created by 萌即正义 on 13/04/2018.
@@ -22,6 +23,7 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTheme(ThemeUtil.getTheme());
         TAG = getClass().getSimpleName();
         Log.d("BaseActivity", getClass().getSimpleName());
         SessionContext.activities.put(getClass().getSimpleName(), this);

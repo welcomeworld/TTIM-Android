@@ -11,10 +11,10 @@ public class ChatMessage {
     private Drawable touxiang;
     private String name;
     private String message;
-    private String time;
+    private long time;
     private int type;
 
-    public ChatMessage(Drawable touxiang, String name, String message, String time, int type) {
+    public ChatMessage(Drawable touxiang, String name, String message, long time, int type) {
         this.touxiang = touxiang;
         this.name = name;
         this.message = message;
@@ -46,11 +46,11 @@ public class ChatMessage {
         this.message = message;
     }
 
-    public String getTime() {
+    public long getTime() {
         return time;
     }
 
-    public void setTime(String time) {
+    public void setTime(long time) {
         this.time = time;
     }
 

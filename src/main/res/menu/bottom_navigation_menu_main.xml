@@ -6,13 +6,13 @@
     <item
         android:id="@+id/bottom_navigation_menu_message"
         android:title="@string/message"
-        android:icon="@mipmap/ic_launcher" />
+        android:icon="@drawable/message_black_icon_24dp" />
     <item
         android:id="@+id/bottom_navigation_menu_friend"
         android:title="@string/friends"
-        android:icon="@mipmap/ic_launcher" />
+        android:icon="@drawable/friend_black_icon_24dp" />
     <item
         android:id="@+id/bottom_navigation_menu_favorite"
         android:title="@string/favorite"
-        android:icon="@mipmap/ic_launcher" />
+        android:icon="@drawable/favorite_black__icon_24dp" />
 </menu>

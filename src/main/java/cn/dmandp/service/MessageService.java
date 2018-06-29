@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.List;
 
 import cn.dmandp.adapter.ConversationListItemAdapter;
+import cn.dmandp.adapter.FavoriteRecyclerViewItemAdapter;
 import cn.dmandp.adapter.FriendRecyclerViewItemAdapter;
 import cn.dmandp.common.Const;
 import cn.dmandp.common.OprateOptions;
@@ -47,11 +48,13 @@ import cn.dmandp.context.TtApplication;
 import cn.dmandp.dao.TTIMDaoHelper;
 import cn.dmandp.entity.ChatMessage;
 import cn.dmandp.entity.ConversationListItem;
+import cn.dmandp.entity.FavoriteRecyclerViewItem;
 import cn.dmandp.entity.FriendRecyclerViewItem;
 import cn.dmandp.entity.TTIMPacket;
 import cn.dmandp.entity.TTMessage;
 import cn.dmandp.entity.TTUser;
 import cn.dmandp.netio.FileThread;
+import cn.dmandp.tt.ActivityCollector;
 import cn.dmandp.tt.ConversationActivity;
 import cn.dmandp.tt.LoginActivity;
 import cn.dmandp.tt.MainActivity;
@@ -124,6 +127,7 @@ public class MessageService extends Service {
                     TYPES.add(TYPE.SEND_RESP);
                     TYPES.add(TYPE.HEART);
                     TYPES.add(TYPE.USERINFO_RESP);
+                    TYPES.add(TYPE.FAVORITE_RESP);
                     // reading  data from server
                     while (true) {
                         int readnum = 0;
@@ -244,6 +248,7 @@ public class MessageService extends Service {
                     if (body[0] != RESP_CODE.SUCCESS) {
                         //Login fail
                         if (loginActivity == null) {
+                            ActivityCollector.finishAll();
                             Intent loginIntent = new Intent(MessageService.this, LoginActivity.class);
                             loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(loginIntent);
@@ -256,7 +261,13 @@ public class MessageService extends Service {
                         }
                         break;
                     } else {
-
+                        TTIMPacket favoritePacket = new TTIMPacket();
+                        favoritePacket.setTYPE(TYPE.FAVORITE_REQ);
+                        favoritePacket.setBodylength(1);
+                        byte[] favoritebody = new byte[1];
+                        favoritebody[0] = OprateOptions.GET;
+                        favoritePacket.setBody(favoritebody);
+                        TtApplication.send(favoritePacket);
                         //Login is successful
                         Intent intent = new Intent("cn.dmandp.tt.action.MAINACTIVITY");
                         //LoginActivity have been destroyed
@@ -453,7 +464,7 @@ public class MessageService extends Service {
                                     } else {
                                         chatUserName = "未知";
                                     }
-                                    conversationActivity.getAllMessages().get(message.getMFromId()).add(new ChatMessage(roundedBitmapDrawable, chatUserName + "", message.getMContent(), format.format(new Date(message.getMTime())), 1));
+                                    conversationActivity.getAllMessages().get(message.getMFromId()).add(new ChatMessage(roundedBitmapDrawable, chatUserName + "", message.getMContent(), message.getMTime(), 1));
                                 }
                                 List<ChatMessage> messages = conversationActivity.getMessages();
                                 //chatting with message sender
@@ -533,6 +544,15 @@ public class MessageService extends Service {
                                             break;
                                         }
                                     }
+                                    //update favoriteList UI
+                                    FavoriteRecyclerViewItemAdapter favoriteRecyclerViewItemAdapter = mainActivity.getFavoriteRecyclerViewItemAdapter();
+                                    List<FavoriteRecyclerViewItem> favoriteRecyclerViewItemList = mainActivity.getFavoriteRecyclerViewData();
+                                    for (int i = 0; i < favoriteRecyclerViewItemList.size(); i++) {
+                                        if (favoriteRecyclerViewItemList.get(i).getuId() == getUser.getUId()) {
+                                            favoriteRecyclerViewItemList.get(i).setUsername(getUser.getUName());
+                                        }
+                                    }
+                                    favoriteRecyclerViewItemAdapter.notifyDataSetChanged();
                                 }
                                 //update conversationActivity UI
                                 if (conversationActivity != null) {
@@ -608,7 +628,17 @@ public class MessageService extends Service {
                                 friendRecyclerViewItemAdapter.notifyDataSetChanged();
                             }
                         }
-
+                        //update favorite UI
+                        RoundedBitmapDrawable favoriteroundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+                        favoriteroundedBitmapDrawable.setCircular(true);
+                        FavoriteRecyclerViewItemAdapter favoriteRecyclerViewItemAdapter = mainActivity.getFavoriteRecyclerViewItemAdapter();
+                        List<FavoriteRecyclerViewItem> favoriteRecyclerViewItemList = mainActivity.getFavoriteRecyclerViewData();
+                        for (int i = 0; i < favoriteRecyclerViewItemList.size(); i++) {
+                            if (favoriteRecyclerViewItemList.get(i).getuId() == uid) {
+                                favoriteRecyclerViewItemList.get(i).setPrimaryImage(favoriteroundedBitmapDrawable);
+                            }
+                        }
+                        favoriteRecyclerViewItemAdapter.notifyDataSetChanged();
                     }
                     //update ConversationActivity's photo
                     if (conversationActivity != null) {
@@ -625,6 +655,37 @@ public class MessageService extends Service {
                         }
                     }
                     break;
+                case TYPE.FAVORITE_RESP:
+                    Log.e(TAG, "favorite...");
+                    if (body[0] == RESP_CODE.SUCCESS) {
+                        byte[] favoritebody = new byte[body.length - 1];
+                        System.arraycopy(body, 1, favoritebody, 0, favoritebody.length);
+                        try {
+                            TTMessage message = TTMessage.parseFrom(favoritebody);
+                            database.execSQL("insert into favorite values(?,?,?,?,?)", new Object[]{sessionContext.getuID(), message.getMContent(), message.getMTime(), message.getMFromId(), message.getMToId()});
+                            Bitmap favoritephoto = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + message.getMFromId() + ".png");
+                            String username = "未知用户";
+                            if (message.getMFromId() == currentUserId) {
+                                username = sessionContext.getBindUser().getUName();
+                            } else {
+                                Cursor cursor = database.rawQuery("select * from friends where uid=? and friendid=?", new String[]{sessionContext.getuID() + "", message.getMFromId() + ""});
+                                if (cursor.moveToNext()) {
+                                    username = cursor.getString(cursor.getColumnIndex("Uname"));
+                                }
+                            }
+                            if (favoritephoto == null) {
+                                photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                            }
+                            RoundedBitmapDrawable favoriteroundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, favoritephoto);
+                            favoriteroundedBitmapDrawable.setCircular(true);
+                            if (mainActivity != null) {
+                                mainActivity.getFavoriteRecyclerViewData().add(0, new FavoriteRecyclerViewItem(message.getMFromId(), username, message.getMContent(), message.getMTime(), favoriteroundedBitmapDrawable, message.getMToId()));
+                                mainActivity.getFavoriteRecyclerViewItemAdapter().notifyItemInserted(0);
+                            }
+                        } catch (Exception e) {
+
+                        }
+                    }
             }
         }
     }

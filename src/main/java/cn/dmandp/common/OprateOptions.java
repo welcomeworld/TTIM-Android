@@ -10,4 +10,6 @@ public class OprateOptions {
     public static final byte ANSWER = 1;
     public static final byte GET = 2;
     public static final byte UPDATE = 3;
+    public static final byte SET = 4;
+    public static final byte DELETE = 5;
 }

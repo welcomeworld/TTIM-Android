@@ -77,5 +77,13 @@ public interface TYPE {
      * user photo set resp
      */
     static final byte USERPHOTO_SET_RESP = 18;
+    /**
+     * favorite req
+     */
+    static final byte FAVORITE_REQ = 19;
+    /**
+     * favorite resp
+     */
+    static final byte FAVORITE_RESP = 20;
 }
 

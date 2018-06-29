@@ -3,7 +3,7 @@
     android:id="@+id/navigation_main_header"
     android:layout_width="match_parent"
     android:layout_height="128dp"
-    android:background="@color/colorPrimary"
+    android:background="?colorPrimary"
     android:orientation="vertical">
 
     <ImageButton

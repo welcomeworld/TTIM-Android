@@ -2,6 +2,7 @@ package cn.dmandp.tt;
 
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -24,12 +26,14 @@ import java.util.Locale;
 import java.util.Map;
 
 import cn.dmandp.adapter.MessageAdapter;
+import cn.dmandp.common.OprateOptions;
 import cn.dmandp.common.TYPE;
 import cn.dmandp.context.SessionContext;
 import cn.dmandp.context.TtApplication;
 import cn.dmandp.dao.TTIMDaoHelper;
 import cn.dmandp.entity.ChatMessage;
 import cn.dmandp.entity.ConversationListItem;
+import cn.dmandp.entity.FavoriteRecyclerViewItem;
 import cn.dmandp.entity.TTIMPacket;
 import cn.dmandp.entity.TTMessage;
 
@@ -109,6 +113,42 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
         ListView messagelistview = (ListView) findViewById(R.id.conversation_listview);
         datainit();
         adapter = new MessageAdapter(ConversationActivity.this, R.layout.listview_message, messages);
+        adapter.setOnItemClickListener(new MessageAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, ChatMessage message) {
+                TTIMPacket favoritePacket = new TTIMPacket();
+                TTMessage.Builder builder = TTMessage.newBuilder();
+                builder.setMContent(message.getMessage());
+                builder.setMTime(message.getTime());
+                if (message.getType() == 0) {
+                    builder.setMToId(chatUserId);
+                    builder.setMFromId(currentUserId);
+                } else {
+                    builder.setMToId(currentUserId);
+                    builder.setMFromId(chatUserId);
+                }
+                TTMessage favoritemessage = builder.build();
+                favoritePacket.setTYPE(TYPE.FAVORITE_REQ);
+                favoritePacket.setBodylength(favoritemessage.toByteArray().length + 1);
+                byte[] body = new byte[favoritemessage.toByteArray().length + 1];
+                body[0] = OprateOptions.SET;
+                System.arraycopy(favoritemessage.toByteArray(), 0, body, 1, body.length - 1);
+                favoritePacket.setBody(body);
+                TtApplication.send(favoritePacket);
+                //save favorite to local database
+                try {
+                    database.execSQL("insert into favorite values(?,?,?,?,?);", new Object[]{currentUserId, favoritemessage.getMContent(), favoritemessage.getMTime(), favoritemessage.getMFromId(), favoritemessage.getMToId()});
+                    Toast.makeText(ConversationActivity.this, "have save to favorite", Toast.LENGTH_SHORT).show();
+                    MainActivity mainActivity = (MainActivity) SessionContext.activities.get("MainActivity");
+                    if (mainActivity != null) {
+                        mainActivity.getFavoriteRecyclerViewData().add(0, new FavoriteRecyclerViewItem(favoritemessage.getMFromId(), message.getName(), message.getMessage(), message.getTime(), message.getTouxiang(), favoritemessage.getMToId()));
+                        mainActivity.getFavoriteRecyclerViewItemAdapter().notifyItemInserted(0);
+                    }
+                } catch (Exception e) {
+
+                }
+            }
+        });
         messagelistview.setAdapter(adapter);
     }
 
@@ -133,12 +173,12 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
                 }
                 RoundedBitmapDrawable userRoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, userPhoto);
                 userRoundedBitmapDrawable.setCircular(true);
-                SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.CHINA);
-                ChatMessage newMessage = new ChatMessage(userRoundedBitmapDrawable, currentUserName, messagetext.getText() + "", format.format(new Date(message.getMTime())), 0);
+                ChatMessage newMessage = new ChatMessage(userRoundedBitmapDrawable, currentUserName, messagetext.getText() + "", message.getMTime(), 0);
                 messagetext.setText("");
                 messages.add(newMessage);
                 adapter.notifyDataSetChanged();
                 MainActivity mainActivity = (MainActivity) SessionContext.activities.get("MainActivity");
+                SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.CHINA);
                 if (mainActivity != null) {
                     List<ConversationListItem> conversationList = mainActivity.getConversationList();
                     for (int i = 0; i < conversationList.size(); i++) {
@@ -179,9 +219,9 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
             Long mtime = message.getLong(message.getColumnIndex("Mtime"));
             int fromid = message.getInt(message.getColumnIndex("Fromid"));
             if (fromid == currentUserId) {
-                messages.add(new ChatMessage(userRoundedBitmapDrawable, currentUserName + "", mcontent, format.format(new Date(mtime)), 0));
+                messages.add(new ChatMessage(userRoundedBitmapDrawable, currentUserName + "", mcontent, mtime, 0));
             } else {
-                messages.add(new ChatMessage(roundedBitmapDrawable, chatUserName + "", mcontent, format.format(new Date(mtime)), 1));
+                messages.add(new ChatMessage(roundedBitmapDrawable, chatUserName + "", mcontent, mtime, 1));
             }
         }
         message.close();

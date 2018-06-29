@@ -18,6 +18,12 @@ public class TTIMDaoHelper extends SQLiteOpenHelper {
             "Fromid int not null," +
             "Toid int not null," +
             "Primary key (fromid,toid,mtime))";
+    private final String CREATE_FAVORITE = "CREATE TABLE `favorite` (saveuserid int(11) NOT NULL ,  " +
+            "`mcontent` varchar(400) NOT NULL,   " +
+            "`mtime` bigint(20) NOT NULL,   " +
+            "`fromid` int(11) NOT NULL,   " +
+            "`toid` int(11) NOT NULL,   " +
+            "PRIMARY KEY (saveuserid,`fromid`,`toid`,`mtime`) );";
 
     private Context mContext;
 
@@ -35,6 +41,7 @@ public class TTIMDaoHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_FRIENDS);
         db.execSQL(CREATE_MESSAGES);
+        db.execSQL(CREATE_FAVORITE);
     }
 
     @Override

@@ -54,20 +54,26 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import cn.dmandp.adapter.FavoriteRecyclerViewItemAdapter;
 import cn.dmandp.adapter.FriendRecyclerViewItemAdapter;
 import cn.dmandp.adapter.MyViewPagerAdapter;
 import cn.dmandp.common.MyDividerItemDecoration;
+import cn.dmandp.common.OprateOptions;
 import cn.dmandp.common.TYPE;
 import cn.dmandp.dao.TTIMDaoHelper;
 import cn.dmandp.entity.ConversationListItem;
 import cn.dmandp.adapter.ConversationListItemAdapter;
 import cn.dmandp.context.SessionContext;
 import cn.dmandp.context.TtApplication;
+import cn.dmandp.entity.FavoriteRecyclerViewItem;
 import cn.dmandp.entity.FriendRecyclerViewItem;
+import cn.dmandp.entity.TTIMPacket;
+import cn.dmandp.entity.TTMessage;
 import cn.dmandp.entity.TTUser;
 import cn.dmandp.netio.FileThread;
 import cn.dmandp.netio.Result;
 import cn.dmandp.service.MessageService;
+import cn.dmandp.utils.ThemeUtil;
 import cn.dmandp.view.LoadView;
 import cn.dmandp.view.MyViewPager;
 
@@ -101,6 +107,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     private FriendRecyclerViewItemAdapter friendRecyclerViewItemAdapter;
+    private FavoriteRecyclerViewItemAdapter favoriteRecyclerViewItemAdapter;
+    private ArrayList<FavoriteRecyclerViewItem> favoriteRecyclerViewData = new ArrayList<FavoriteRecyclerViewItem>();
 
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
@@ -108,6 +116,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private ActionBarDrawerToggle drawerToggle;
     private RecyclerView recyclerView;
     private RecyclerView friendListView;
+
+    public FavoriteRecyclerViewItemAdapter getFavoriteRecyclerViewItemAdapter() {
+        return favoriteRecyclerViewItemAdapter;
+    }
+
+    public ArrayList<FavoriteRecyclerViewItem> getFavoriteRecyclerViewData() {
+        return favoriteRecyclerViewData;
+    }
+
+    private RecyclerView favoriteListView;
     private MyViewPager viewPager;
     private BottomNavigationView bottomNavigationView;
     LoadView loadView;
@@ -186,6 +204,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
+                    case R.id.navigation_menu_item_theme:
+                        ThemeUtil.setTheme(R.style.AppTheme_pink);
+                        recreate();
+                        break;
                     case R.id.navigation_menu_item_copyright:
                         Snackbar.make(navigationView, R.string.copyRight, Snackbar.LENGTH_LONG).show();
                         break;
@@ -257,7 +279,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         viewPager = findViewById(R.id.main_viewpager);
         View messageView = LayoutInflater.from(this).inflate(R.layout.viewpager_main_message, null);
         View friendView = LayoutInflater.from(this).inflate(R.layout.viewpager_main_friend, null);
-        View favoriteView = LayoutInflater.from(this).inflate(R.layout.viewpager_main_friend, null);
+        View favoriteView = LayoutInflater.from(this).inflate(R.layout.viewpager_main_favorite, null);
         viewContainter.add(messageView);
         viewContainter.add(friendView);
         viewContainter.add(favoriteView);
@@ -322,37 +344,45 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         friendRecyclerViewItemAdapter = new FriendRecyclerViewItemAdapter(friendRecyclerViewData);
         friendRecyclerViewItemAdapter.setOnItemClickListener(new FriendRecyclerViewItemAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(View view, int uId) {
-                Intent intent = new Intent(MainActivity.this, ConversationActivity.class);
-                intent.putExtra("uId", uId);
-                startActivity(intent);
-                SharedPreferences messageSharedPreferences = getSharedPreferences("message", MODE_PRIVATE);
-                SharedPreferences.Editor editor = messageSharedPreferences.edit();
-                int messageCount = messageSharedPreferences.getInt(uId + ":" + currentUserId, -1);
-                editor.putInt(uId + ":" + currentUserId, 0);
-                editor.commit();
-                if (messageCount != -1) {
-                    for (ConversationListItem item : conversationList) {
-                        if (item.getUId() == uId) {
-                            item.setNewMessage("0");
-                            conversationListItemAdapter.notifyItemChanged(conversationList.indexOf(item));
-                            break;
+            public void onItemClick(View view, FriendRecyclerViewItem currentView) {
+                if (view.getId() == R.id.recyclerview_friend_layout) {
+                    Intent personInfoIntent = new Intent(MainActivity.this, PersonInfoActivity.class);
+                    personInfoIntent.putExtra("uId", currentView.getUId());
+                    personInfoIntent.putExtra("uName", currentView.getUsername());
+                    startActivity(personInfoIntent);
+                } else if (R.id.recyclerview_friend_action == view.getId()) {
+                    int uId = currentView.getUId();
+                    Intent intent = new Intent(MainActivity.this, ConversationActivity.class);
+                    intent.putExtra("uId", uId);
+                    startActivity(intent);
+                    SharedPreferences messageSharedPreferences = getSharedPreferences("message", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = messageSharedPreferences.edit();
+                    int messageCount = messageSharedPreferences.getInt(uId + ":" + currentUserId, -1);
+                    editor.putInt(uId + ":" + currentUserId, 0);
+                    editor.commit();
+                    if (messageCount != -1) {
+                        for (ConversationListItem item : conversationList) {
+                            if (item.getUId() == uId) {
+                                item.setNewMessage("0");
+                                conversationListItemAdapter.notifyItemChanged(conversationList.indexOf(item));
+                                break;
+                            }
                         }
-                    }
-                } else {
-                    //new conversationListItem
-                    Cursor cursor = database.rawQuery("select * from friends where uid=? and friendid=?", new String[]{currentUserId + "", uId + ""});
-                    if (cursor.moveToNext()) {
-                        Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + uId + ".png");
-                        if (photo == null) {
-                            photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
-                            Log.e("MainActivity", "do not have file" + uId + ".png");
+                    } else {
+                        //new conversationListItem
+                        Cursor cursor = database.rawQuery("select * from friends where uid=? and friendid=?", new String[]{currentUserId + "", uId + ""});
+                        if (cursor.moveToNext()) {
+                            Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + uId + ".png");
+                            if (photo == null) {
+                                photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                                Log.e("MainActivity", "do not have file" + uId + ".png");
+                            }
+                            RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+                            roundedBitmapDrawable.setCircular(true);
+                            SimpleDateFormat format = new SimpleDateFormat("HH:mm");
+                            conversationList.add(0, new ConversationListItem(uId, cursor.getString(cursor.getColumnIndex("Uname")), "", format.format(new Date(System.currentTimeMillis())), 0 + "", roundedBitmapDrawable));
+                            conversationListItemAdapter.notifyItemInserted(0);
                         }
-                        RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
-                        roundedBitmapDrawable.setCircular(true);
-                        SimpleDateFormat format = new SimpleDateFormat("HH:mm");
-                        conversationList.add(0, new ConversationListItem(uId, cursor.getString(cursor.getColumnIndex("Uname")), "", format.format(new Date(System.currentTimeMillis())), 0 + "", roundedBitmapDrawable));
-                        conversationListItemAdapter.notifyItemInserted(0);
                     }
                 }
             }
@@ -362,6 +392,51 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         friendListView.setItemAnimator(new DefaultItemAnimator());
 
         //friendRecyclerView initialization end
+        favoriteListView = favoriteView.findViewById(R.id.viewpager_favorite_recyclerview);
+        LinearLayoutManager favoriteListViewLayoutManager = new LinearLayoutManager(MainActivity.this);
+        favoriteListViewLayoutManager.setOrientation(OrientationHelper.VERTICAL);
+        favoriteListView.setLayoutManager(favoriteListViewLayoutManager);
+        favoriteRecyclerViewItemAdapter = new FavoriteRecyclerViewItemAdapter(favoriteRecyclerViewData);
+        favoriteRecyclerViewItemAdapter.setOnItemClickListener(new FavoriteRecyclerViewItemAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, FavoriteRecyclerViewItem currentView) {
+                if (view.getId() == R.id.recyclerview_favorite_delete) {
+                    Toast.makeText(MainActivity.this, "you onclick:delete", Toast.LENGTH_LONG).show();
+                    TTIMPacket favoritePacket = new TTIMPacket();
+                    TTMessage.Builder builder = TTMessage.newBuilder();
+                    builder.setMContent(currentView.getMessage());
+                    builder.setMTime(currentView.getTime());
+                    builder.setMToId(currentView.getToId());
+                    builder.setMFromId(currentView.getuId());
+                    TTMessage favoritemessage = builder.build();
+                    favoritePacket.setTYPE(TYPE.FAVORITE_REQ);
+                    favoritePacket.setBodylength(favoritemessage.toByteArray().length + 1);
+                    byte[] body = new byte[favoritemessage.toByteArray().length + 1];
+                    body[0] = OprateOptions.DELETE;
+                    System.arraycopy(favoritemessage.toByteArray(), 0, body, 1, body.length - 1);
+                    favoritePacket.setBody(body);
+                    TtApplication.send(favoritePacket);
+                    //delete from local
+                    try {
+                        database.execSQL("delete from favorite where saveuserid=? and mtime=? and fromid=? and toid=?;", new Object[]{currentUserId, favoritemessage.getMTime(), favoritemessage.getMFromId(), favoritemessage.getMToId()});
+                        favoriteRecyclerViewData.remove(currentView);
+                        favoriteRecyclerViewItemAdapter.notifyDataSetChanged();
+                    } catch (Exception e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+
+                } else if (view.getId() == R.id.recyclerview_favorite_share) {
+                    Toast.makeText(MainActivity.this, "you onclick:share", Toast.LENGTH_LONG).show();
+                } else if (view.getId() == R.id.recyclerview_favorite_card) {
+                    Toast.makeText(MainActivity.this, "you onclick:card", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "you onclick:" + view.getId(), Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+        favoriteListView.setAdapter(favoriteRecyclerViewItemAdapter);
+        favoriteListView.addItemDecoration(new MyDividerItemDecoration());
+        favoriteListView.setItemAnimator(new DefaultItemAnimator());
         dataInit();
     }
 
@@ -462,7 +537,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 Long mtime = message.getLong(message.getColumnIndex("Mtime"));
                 conversationList.add(new ConversationListItem(friendid, uname, mcontent, format.format(new Date(mtime)), messagecount + "", roundedBitmapDrawable));
             }
+            message.close();
         }
+        cursor.close();
         friendRecyclerViewItemAdapter.notifyDataSetChanged();
         Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + currentUserId + ".png");
         if (photo == null) {
@@ -473,6 +550,28 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         roundedBitmapDrawable.setCircular(true);
         ImageButton headerPhotoView = headerView.findViewById(R.id.navigation_photo_header);
         headerPhotoView.setImageDrawable(roundedBitmapDrawable);
+        Cursor favorites = database.rawQuery("select * from favorite where  saveuserid=? order by Mtime desc", new String[]{currentUserId + ""});
+        while (favorites.moveToNext()) {
+            Bitmap favoritephoto = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + favorites.getInt(favorites.getColumnIndex("fromid")) + ".png");
+            if (favoritephoto == null) {
+                favoritephoto = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                Log.e("MainActivity", "do not have file" + currentUserId + ".png");
+            }
+            RoundedBitmapDrawable roundedBitmapDrawable2 = RoundedBitmapDrawableFactory.create(null, favoritephoto);
+            roundedBitmapDrawable2.setCircular(true);
+            String uname = "未知";
+            if (favorites.getInt(favorites.getColumnIndex("fromid")) == currentUserId) {
+                uname = currentUserName;
+            } else {
+                Cursor favoriteuser = database.rawQuery("select * from friends where uid=? and friendid=?", new String[]{currentUserId + "", favorites.getInt(favorites.getColumnIndex("fromid")) + ""});
+                if (favoriteuser.moveToNext()) {
+                    uname = favoriteuser.getString(favoriteuser.getColumnIndex("uname"));
+                }
+
+            }
+            favoriteRecyclerViewData.add(new FavoriteRecyclerViewItem(favorites.getInt(favorites.getColumnIndex("fromid")), uname, favorites.getString(favorites.getColumnIndex("mcontent")), favorites.getLong(favorites.getColumnIndex("mtime")), roundedBitmapDrawable2, favorites.getInt(favorites.getColumnIndex("toid"))));
+        }
+        favoriteRecyclerViewItemAdapter.notifyDataSetChanged();
     }
 
 }
