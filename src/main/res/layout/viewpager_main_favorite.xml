@@ -6,8 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v7.widget.RecyclerView
+    <cn.dmandp.view.RefreshRecyclerView
         android:id="@+id/viewpager_favorite_recyclerview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></android.support.v7.widget.RecyclerView>
+        android:layout_height="match_parent"></cn.dmandp.view.RefreshRecyclerView>
 </FrameLayout>

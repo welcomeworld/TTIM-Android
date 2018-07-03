@@ -15,6 +15,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
@@ -56,6 +58,8 @@ import java.util.List;
 
 import cn.dmandp.adapter.FavoriteRecyclerViewItemAdapter;
 import cn.dmandp.adapter.FriendRecyclerViewItemAdapter;
+import cn.dmandp.adapter.HeaderAndFooterAdapter;
+import cn.dmandp.adapter.MessageAdapter;
 import cn.dmandp.adapter.MyViewPagerAdapter;
 import cn.dmandp.common.MyDividerItemDecoration;
 import cn.dmandp.common.OprateOptions;
@@ -74,15 +78,24 @@ import cn.dmandp.netio.FileThread;
 import cn.dmandp.netio.Result;
 import cn.dmandp.service.MessageService;
 import cn.dmandp.utils.ThemeUtil;
+import cn.dmandp.view.DefaultRefreshCreator;
 import cn.dmandp.view.LoadView;
 import cn.dmandp.view.MyViewPager;
+import cn.dmandp.view.RefreshRecyclerView;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener {
+    public MainHandler handler = new MainHandler();
+    HeaderAndFooterAdapter headerAndFooterAdapter;
+    HeaderAndFooterAdapter refreshFriendAdapter;
+    HeaderAndFooterAdapter refreshFavoriteAdapter;
     private SessionContext sessionContext;
     private TTIMDaoHelper daoHelper = new TTIMDaoHelper(this);
     private SQLiteDatabase database;
     private int currentUserId;
     private String currentUserName;
+    public static final int STOP_MESSAGE_REFRESH = 1;
+    public static final int STOP_FRIEND_REFRESH = 2;
+    public static final int STOP_FAVORITE_REFRESH = 3;
     ArrayList<View> viewContainter = new ArrayList<View>();
 
     public List<ConversationListItem> getConversationList() {
@@ -114,8 +127,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private DrawerLayout drawerLayout;
     private AppBarLayout appBarLayout;
     private ActionBarDrawerToggle drawerToggle;
-    private RecyclerView recyclerView;
-    private RecyclerView friendListView;
+
+    public RefreshRecyclerView getRecyclerView() {
+        return recyclerView;
+    }
+
+    private RefreshRecyclerView recyclerView;
+    private RefreshRecyclerView friendListView;
 
     public FavoriteRecyclerViewItemAdapter getFavoriteRecyclerViewItemAdapter() {
         return favoriteRecyclerViewItemAdapter;
@@ -125,7 +143,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         return favoriteRecyclerViewData;
     }
 
-    private RecyclerView favoriteListView;
+    private RefreshRecyclerView favoriteListView;
     private MyViewPager viewPager;
     private BottomNavigationView bottomNavigationView;
     LoadView loadView;
@@ -216,7 +234,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     case R.id.navigation_menu_item_logout:
                         Intent logoutIntent = new Intent(MainActivity.this, LoginActivity.class);
                         TtApplication application = (TtApplication) getApplication();
-                        SessionContext sessionContext = application.getSessionContext();
+                        SessionContext sessionContext = TtApplication.getSessionContext();
                         //remove currentUserId currentUserPassword and currentUserName from SharedPreferences
                         SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
                         editor.remove("currentUserId");
@@ -277,6 +295,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
         //-----viewpager initialization start
         viewPager = findViewById(R.id.main_viewpager);
+        viewPager.setOffscreenPageLimit(2);
         View messageView = LayoutInflater.from(this).inflate(R.layout.viewpager_main_message, null);
         View friendView = LayoutInflater.from(this).inflate(R.layout.viewpager_main_friend, null);
         View favoriteView = LayoutInflater.from(this).inflate(R.layout.viewpager_main_favorite, null);
@@ -331,9 +350,38 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 }
             }
         });
-        recyclerView.setAdapter(conversationListItemAdapter);
+        headerAndFooterAdapter = new HeaderAndFooterAdapter(conversationListItemAdapter);
+        recyclerView.setAdapter(headerAndFooterAdapter);
+        recyclerView.addRefreshViewCreator(new DefaultRefreshCreator());
         recyclerView.addItemDecoration(new MyDividerItemDecoration());
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setOnRefreshListener(new RefreshRecyclerView.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                TTIMPacket packet = new TTIMPacket();
+                packet.setTYPE(TYPE.RECEIVE_REQ);
+                final byte[] receivebody = {1};
+                packet.setBodylength(receivebody.length);
+                packet.setBody(receivebody);
+                TtApplication.send(packet);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(2000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        if (recyclerView.getmCurrentRefreshStatus() == recyclerView.REFRESH_STATUS_REFRESHING) {
+                            Message msg = Message.obtain();
+                            msg.what = STOP_MESSAGE_REFRESH;
+                            handler.sendMessage(msg);
+                            Log.e(TAG, "NOT MESSAGE REFRESH");
+                        }
+                    }
+                }).start();
+            }
+        });
         //messageRecyclerView initialization end
 
         //friendRecyclerView initialization start
@@ -387,9 +435,49 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 }
             }
         });
-        friendListView.setAdapter(friendRecyclerViewItemAdapter);
+        refreshFriendAdapter = new HeaderAndFooterAdapter(friendRecyclerViewItemAdapter);
+        friendListView.setAdapter(refreshFriendAdapter);
         friendListView.addItemDecoration(new MyDividerItemDecoration());
         friendListView.setItemAnimator(new DefaultItemAnimator());
+        friendListView.addRefreshViewCreator(new DefaultRefreshCreator());
+        friendListView.setOnRefreshListener(new RefreshRecyclerView.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                List<Integer> friendlist = sessionContext.getBindUser().getUFriendsList();
+                for (int friendid : friendlist) {
+                    TTIMPacket friendpacket = new TTIMPacket();
+                    friendpacket.setTYPE(TYPE.USERINFO_REQ);
+                    ByteBuffer friendByteBuffer = ByteBuffer.allocate(50);
+                    friendByteBuffer.put(OprateOptions.GET);
+                    friendByteBuffer.putInt(friendid);
+                    friendByteBuffer.flip();
+                    friendpacket.setBodylength(friendByteBuffer.remaining());
+                    friendpacket.setBody(friendByteBuffer.array());
+                    TtApplication.send(friendpacket);
+
+                    Bundle fileBundle = new Bundle();
+                    fileBundle.putInt("uid", friendid);
+                    fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
+                    new FileThread(MainActivity.this, fileBundle, MessageService.getInstance().getHandler()).start();
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Thread.sleep(2000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            if (friendListView.getmCurrentRefreshStatus() == friendListView.REFRESH_STATUS_REFRESHING) {
+                                Message msg = Message.obtain();
+                                msg.what = STOP_FRIEND_REFRESH;
+                                handler.sendMessage(msg);
+                                Log.e(TAG, "NOT Friend REFRESH");
+                            }
+                        }
+                    }).start();
+                }
+            }
+        });
 
         //friendRecyclerView initialization end
         favoriteListView = favoriteView.findViewById(R.id.viewpager_favorite_recyclerview);
@@ -434,9 +522,39 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 }
             }
         });
-        favoriteListView.setAdapter(favoriteRecyclerViewItemAdapter);
+        refreshFavoriteAdapter = new HeaderAndFooterAdapter(favoriteRecyclerViewItemAdapter);
+        favoriteListView.setAdapter(refreshFavoriteAdapter);
         favoriteListView.addItemDecoration(new MyDividerItemDecoration());
         favoriteListView.setItemAnimator(new DefaultItemAnimator());
+        favoriteListView.addRefreshViewCreator(new DefaultRefreshCreator());
+        favoriteListView.setOnRefreshListener(new RefreshRecyclerView.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                TTIMPacket favoritePacket = new TTIMPacket();
+                favoritePacket.setTYPE(TYPE.FAVORITE_REQ);
+                favoritePacket.setBodylength(1);
+                byte[] favoritebody = new byte[1];
+                favoritebody[0] = OprateOptions.GET;
+                favoritePacket.setBody(favoritebody);
+                TtApplication.send(favoritePacket);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(2000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        if (favoriteListView.getmCurrentRefreshStatus() == favoriteListView.REFRESH_STATUS_REFRESHING) {
+                            Message msg = Message.obtain();
+                            msg.what = STOP_FAVORITE_REFRESH;
+                            handler.sendMessage(msg);
+                            Log.e(TAG, "NOT Favorite REFRESH");
+                        }
+                    }
+                }).start();
+            }
+        });
         dataInit();
     }
 
@@ -450,6 +568,23 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         super.onResume();
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.cancelAll();
+    }
+
+    public class MainHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case STOP_MESSAGE_REFRESH:
+                    recyclerView.onStopRefresh();
+                    break;
+                case STOP_FRIEND_REFRESH:
+                    friendListView.onStopRefresh();
+                    break;
+                case STOP_FAVORITE_REFRESH:
+                    favoriteListView.onStopRefresh();
+                    break;
+            }
+        }
     }
 
     class MainTask extends AsyncTask<String, String, Result> {
