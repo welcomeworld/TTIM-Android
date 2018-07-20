@@ -45,6 +45,12 @@ public class RefreshRecyclerView extends RecyclerView {
     public int REFRESH_STATUS_LOOSEN_REFRESHING = 0x0033;
     // 正在刷新状态
     public int REFRESH_STATUS_REFRESHING = 0x0033;
+    //刷新使能
+    public boolean refreshEnable = false;
+
+    public void setRefreshEnable(boolean refreshEnable) {
+        this.refreshEnable = refreshEnable;
+    }
 
     public RefreshRecyclerView(Context context) {
         super(context);
@@ -128,7 +134,7 @@ public class RefreshRecyclerView extends RecyclerView {
         switch (e.getAction()) {
             case MotionEvent.ACTION_MOVE:
                 // 如果是在最顶部才处理，否则不需要处理
-                if (canScrollVertically(-1) || mCurrentRefreshStatus == REFRESH_STATUS_REFRESHING) {
+                if (canScrollVertically(-1) || mCurrentRefreshStatus == REFRESH_STATUS_REFRESHING || !refreshEnable) {
                     // 如果没有到达最顶端，也就是说还可以向上滚动就什么都不处理
                     return super.onTouchEvent(e);
                 }
@@ -177,11 +183,17 @@ public class RefreshRecyclerView extends RecyclerView {
     private void addRefreshView() {
         if (adapter != null && mRefreshCreator != null) {
             // 添加头部的刷新View
-            View refreshView = mRefreshCreator.getRefreshView(getContext(), this);
-            if (refreshView != null) {
-                adapter.addHeaderView(refreshView);
-                this.mRefreshView = refreshView;
+            //View refreshView = mRefreshCreator.getRefreshView(getContext(), this);
+            //if (refreshView != null) {
+            //adapter.addHeaderView(refreshView);
+            if (adapter.getHeaderView(0) != null) {
+                this.mRefreshView = adapter.getHeaderView(0);
+                mRefreshCreator.setRefreshView(adapter.getHeaderView(0));
+            } else {
+                this.mRefreshView = mRefreshCreator.getRefreshView(getContext(), this);
+                adapter.addHeaderView(this.mRefreshView);
             }
+            // }
         }
     }
 

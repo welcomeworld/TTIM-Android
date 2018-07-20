@@ -186,6 +186,15 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         loadView = findViewById(R.id.main_loadview);
 
         drawerLayout = findViewById(R.id.main_drawerLayout);
+        appBarLayout = findViewById(R.id.main_appBarLayout);
+        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                recyclerView.setRefreshEnable(verticalOffset == 0);
+                friendListView.setRefreshEnable(verticalOffset == 0);
+                favoriteListView.setRefreshEnable(verticalOffset == 0);
+            }
+        });
         //------toolbar initialization start
         toolbar = findViewById(R.id.main_toolbar);
         toolbar.inflateMenu(R.menu.action_menu_main);
@@ -437,6 +446,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         });
         refreshFriendAdapter = new HeaderAndFooterAdapter(friendRecyclerViewItemAdapter);
         friendListView.setAdapter(refreshFriendAdapter);
+        View friendRefreshView = LayoutInflater.from(this).inflate(R.layout.recyclerview_refresh, friendListView, false);
+        refreshFriendAdapter.addHeaderView(friendRefreshView);
+        View newFriendView = LayoutInflater.from(this).inflate(R.layout.recyclerview_friend_header, friendListView, false);
+        newFriendView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent newFriendIntent = new Intent(MainActivity.this, NewFriendActivity.class);
+                startActivity(newFriendIntent);
+            }
+        });
+        refreshFriendAdapter.addHeaderView(newFriendView);
         friendListView.addItemDecoration(new MyDividerItemDecoration());
         friendListView.setItemAnimator(new DefaultItemAnimator());
         friendListView.addRefreshViewCreator(new DefaultRefreshCreator());
@@ -700,8 +720,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             } else {
                 Cursor favoriteuser = database.rawQuery("select * from friends where uid=? and friendid=?", new String[]{currentUserId + "", favorites.getInt(favorites.getColumnIndex("fromid")) + ""});
                 if (favoriteuser.moveToNext()) {
-                    uname = favoriteuser.getString(favoriteuser.getColumnIndex("uname"));
+                    uname = favoriteuser.getString(favoriteuser.getColumnIndex("Uname"));
                 }
+                favoriteuser.close();
 
             }
             favoriteRecyclerViewData.add(new FavoriteRecyclerViewItem(favorites.getInt(favorites.getColumnIndex("fromid")), uname, favorites.getString(favorites.getColumnIndex("mcontent")), favorites.getLong(favorites.getColumnIndex("mtime")), roundedBitmapDrawable2, favorites.getInt(favorites.getColumnIndex("toid"))));

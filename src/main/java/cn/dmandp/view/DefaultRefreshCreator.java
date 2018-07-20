@@ -19,10 +19,18 @@ public class DefaultRefreshCreator extends RefreshViewCreator {
     private TextView mRefreshIv;
 
     @Override
+    public void setRefreshView(View view) {
+        //View refreshView = LayoutInflater.from(context).inflate(R.layout.recyclerview_refresh, parent, false);
+        //mRefreshIv = refreshView.findViewById(R.id.refresh_text);
+        mRefreshIv = view.findViewById(R.id.refresh_text);
+        //return refreshView;
+    }
+
+    @Override
     public View getRefreshView(Context context, ViewGroup parent) {
-        View refreshView = LayoutInflater.from(context).inflate(R.layout.recyclerview_refresh, parent, false);
-        mRefreshIv = refreshView.findViewById(R.id.refresh_text);
-        return refreshView;
+        View view = LayoutInflater.from(context).inflate(R.layout.recyclerview_refresh, parent, false);
+        mRefreshIv = view.findViewById(R.id.refresh_text);
+        return view;
     }
 
     @Override

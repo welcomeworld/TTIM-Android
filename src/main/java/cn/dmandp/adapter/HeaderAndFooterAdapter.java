@@ -101,6 +101,10 @@ public class HeaderAndFooterAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         return position >= (headerViews.size() + adapter.getItemCount());
     }
 
+    public View getHeaderView(int position) {
+        return headerViews.get(headerViews.keyAt(position));
+    }
+
     RecyclerView.AdapterDataObserver dataObserver = new RecyclerView.AdapterDataObserver() {
         @Override
         public void onChanged() {

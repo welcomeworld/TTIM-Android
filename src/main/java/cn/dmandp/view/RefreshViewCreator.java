@@ -12,10 +12,9 @@ public abstract class RefreshViewCreator {
 
     /**
      * 获取下拉刷新的View
-     *
-     * @param context 上下文
-     * @param parent  RecyclerView
      */
+    public abstract void setRefreshView(View view);
+
     public abstract View getRefreshView(Context context, ViewGroup parent);
 
     /**
