@@ -56,7 +56,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".PersonInfoActivity"></activity>
-
+        <activity android:name=".NewFriendActivity"></activity>
         <service
             android:name="cn.dmandp.service.MessageService"
             android:enabled="true"></service>

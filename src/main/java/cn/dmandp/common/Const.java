@@ -10,4 +10,5 @@ public interface Const {
     public static final int BYTEBUFFER_MAX = 10240;
     public static final int FILEPORT = 52073;
     public static final String CHARSET = "utf-8";
+    public static final String TEST = "test";
 }

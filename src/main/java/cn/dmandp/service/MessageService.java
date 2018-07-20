@@ -385,6 +385,9 @@ public class MessageService extends Service {
                         Log.e(TAG, "not Login");
                         break;
                     }
+                    if (mainActivity != null && mainActivity.getRecyclerView().getmCurrentRefreshStatus() == mainActivity.getRecyclerView().REFRESH_STATUS_REFRESHING) {
+                        mainActivity.getRecyclerView().onStopRefresh();
+                    }
                     if (body[0] == RESP_CODE.SUCCESS) {
                         try {
                             boolean foregroundFlage = false;
