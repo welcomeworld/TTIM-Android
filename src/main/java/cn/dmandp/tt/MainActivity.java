@@ -6,7 +6,9 @@ package cn.dmandp.tt;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.NotificationManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -36,15 +38,21 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+
 
 
 import java.io.File;
@@ -135,6 +143,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private RefreshRecyclerView recyclerView;
     private RefreshRecyclerView friendListView;
 
+    public View getNewFriendView() {
+        return newFriendView;
+    }
+
+    private View newFriendView;
+
     public FavoriteRecyclerViewItemAdapter getFavoriteRecyclerViewItemAdapter() {
         return favoriteRecyclerViewItemAdapter;
     }
@@ -162,7 +176,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         setContentView(R.layout.activity_main);
         //start service
         Intent intent = new Intent(this, MessageService.class);
-        startService(intent);
+        //startService(intent);
         //Login verify
         sessionContext = ((TtApplication) getApplication()).getSessionContext();
         SharedPreferences data = getSharedPreferences("data", MODE_PRIVATE);
@@ -204,6 +218,62 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.menu_main_add:
+                        AlertDialog.Builder builder=new AlertDialog.Builder(MainActivity.this);
+                        final AlertDialog dialog=builder.setTitle("添加好友")
+                                .setPositiveButton("申请", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                TTMessage.Builder messageBuilder=TTMessage.newBuilder();
+                                messageBuilder.setMFromId(currentUserId);
+                                AlertDialog sourceDialog= (AlertDialog) dialog;
+                                EditText idText=sourceDialog.findViewById(R.id.dialog_id);
+                                EditText messageText=sourceDialog.findViewById(R.id.dialog_message);
+                                messageBuilder.setMToId(Integer.parseInt(idText.getText().toString()));
+                                messageBuilder.setMContent(messageText.getText().toString());
+                                messageBuilder.setMTime(System.currentTimeMillis());
+                                TTMessage joinMessage=messageBuilder.build();
+                                TTIMPacket joinPacket=new TTIMPacket();
+                                byte[] body=new byte[joinMessage.toByteArray().length+1];
+                                body[0]=OprateOptions.ASK;
+                                System.arraycopy(joinMessage.toByteArray(),0,body,1,body.length-1);
+                                joinPacket.setTYPE(TYPE.JOIN_REQ);
+                                joinPacket.setBodylength(body.length);
+                                joinPacket.setBody(body);
+                                TtApplication.send(joinPacket);
+                            }
+                        }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        }).setCancelable(false).create();
+                        LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
+                        View           dialogView     = inflater.inflate(R.layout.dialog_add_friend, null);
+                        EditText idEditText=dialogView.findViewById(R.id.dialog_id);
+                        idEditText.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                            }
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {
+                                if(s.toString().trim().equals("")){
+                                    dialog.getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(false);
+                                }else{
+                                    dialog.getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(true);
+                                }
+                            }
+                        });
+                        dialog.setView(dialogView);
+                        dialog.show();
+                        Button button=dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                        button.setEnabled(false);
                         break;
                     case R.id.menu_main_scan:
                         Toast.makeText(MainActivity.this, "your click the scan!", Toast.LENGTH_SHORT).show();
@@ -432,6 +502,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                             Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + uId + ".png");
                             if (photo == null) {
                                 photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                                Bundle fileBundle = new Bundle();
+                                fileBundle.putInt("uid",uId);
+                                fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
+                                if(MessageService.getInstance()!=null){
+                                    new FileThread(MainActivity.this, fileBundle, MessageService.getInstance().getHandler()).start();
+                                }
                                 Log.e("MainActivity", "do not have file" + uId + ".png");
                             }
                             RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
@@ -448,12 +524,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         friendListView.setAdapter(refreshFriendAdapter);
         View friendRefreshView = LayoutInflater.from(this).inflate(R.layout.recyclerview_refresh, friendListView, false);
         refreshFriendAdapter.addHeaderView(friendRefreshView);
-        View newFriendView = LayoutInflater.from(this).inflate(R.layout.recyclerview_friend_header, friendListView, false);
+        newFriendView = LayoutInflater.from(this).inflate(R.layout.recyclerview_friend_header, friendListView, false);
         newFriendView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent newFriendIntent = new Intent(MainActivity.this, NewFriendActivity.class);
                 startActivity(newFriendIntent);
+                findViewById(R.id.friend_header_notification).setVisibility(View.GONE);
             }
         });
         refreshFriendAdapter.addHeaderView(newFriendView);
@@ -463,22 +540,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         friendListView.setOnRefreshListener(new RefreshRecyclerView.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                List<Integer> friendlist = sessionContext.getBindUser().getUFriendsList();
-                for (int friendid : friendlist) {
                     TTIMPacket friendpacket = new TTIMPacket();
-                    friendpacket.setTYPE(TYPE.USERINFO_REQ);
+                    friendpacket.setTYPE(TYPE.FRIENDS_REQ);
                     ByteBuffer friendByteBuffer = ByteBuffer.allocate(50);
                     friendByteBuffer.put(OprateOptions.GET);
-                    friendByteBuffer.putInt(friendid);
                     friendByteBuffer.flip();
                     friendpacket.setBodylength(friendByteBuffer.remaining());
                     friendpacket.setBody(friendByteBuffer.array());
                     TtApplication.send(friendpacket);
-
-                    Bundle fileBundle = new Bundle();
-                    fileBundle.putInt("uid", friendid);
-                    fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
-                    new FileThread(MainActivity.this, fileBundle, MessageService.getInstance().getHandler()).start();
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
@@ -495,7 +564,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                             }
                         }
                     }).start();
-                }
             }
         });
 
@@ -680,6 +748,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + friendid + ".png");
             if (photo == null) {
                 photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                Bundle fileBundle = new Bundle();
+                fileBundle.putInt("uid",friendid);
+                fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
+                if(MessageService.getInstance()!=null){
+                    new FileThread(MainActivity.this, fileBundle, MessageService.getInstance().getHandler()).start();
+                }
                 Log.e("MainActivity", "do not have file" + friendid + ".png");
             }
             RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
@@ -699,6 +773,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + currentUserId + ".png");
         if (photo == null) {
             photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+            Bundle fileBundle = new Bundle();
+            fileBundle.putInt("uid",currentUserId);
+            fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
+            if(MessageService.getInstance()!=null){
+                new FileThread(MainActivity.this, fileBundle, MessageService.getInstance().getHandler()).start();
+            }
             Log.e("MainActivity", "do not have file" + currentUserId + ".png");
         }
         RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
@@ -710,6 +790,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             Bitmap favoritephoto = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + favorites.getInt(favorites.getColumnIndex("fromid")) + ".png");
             if (favoritephoto == null) {
                 favoritephoto = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                Bundle fileBundle = new Bundle();
+                fileBundle.putInt("uid",favorites.getInt(favorites.getColumnIndex("fromid")));
+                fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
+                if(MessageService.getInstance()!=null){
+                    new FileThread(MainActivity.this, fileBundle, MessageService.getInstance().getHandler()).start();
+                }
                 Log.e("MainActivity", "do not have file" + currentUserId + ".png");
             }
             RoundedBitmapDrawable roundedBitmapDrawable2 = RoundedBitmapDrawableFactory.create(null, favoritephoto);

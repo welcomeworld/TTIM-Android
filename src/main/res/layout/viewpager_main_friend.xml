@@ -9,5 +9,6 @@
     <cn.dmandp.view.RefreshRecyclerView
         android:id="@+id/viewpager_friend_recyclerview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></cn.dmandp.view.RefreshRecyclerView>
+        android:layout_height="match_parent">
+    </cn.dmandp.view.RefreshRecyclerView>
 </FrameLayout>

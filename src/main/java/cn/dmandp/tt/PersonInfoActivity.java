@@ -60,6 +60,10 @@ public class PersonInfoActivity extends BaseActivity {
         if (photo == null) {
             Log.e("MessageService", "File is not exist");
             photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+            Bundle fileBundle = new Bundle();
+            fileBundle.putInt("uid",personInfoUserId);
+            fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
+            new FileThread(PersonInfoActivity.this, fileBundle, MessageService.getInstance().getHandler()).start();
         }
         RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
         roundedBitmapDrawable.setCircular(true);

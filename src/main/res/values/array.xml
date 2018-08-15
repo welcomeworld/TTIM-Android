@@ -8,4 +8,8 @@
         <item>@color/colorPrimary</item>
         <item>@color/colorLogin</item>
     </integer-array>
+    <string-array name="new_friend_spinner">
+        <item>@string/agree</item>
+        <item>@string/reject</item>
+    </string-array>
 </resources>

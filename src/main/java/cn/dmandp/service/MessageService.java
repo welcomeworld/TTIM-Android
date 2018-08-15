@@ -83,6 +83,7 @@ public class MessageService extends Service {
     TTIMHandler handler;
 
     public MessageService() {
+
     }
 
     @Override
@@ -290,22 +291,19 @@ public class MessageService extends Service {
                                 editor.putString("currentUserName", currentUser.getUName());
                                 editor.commit();
                                 //get friends info from server
-                                List<Integer> friendlist = currentUser.getUFriendsList();
-                                for (int friendid : friendlist) {
                                     TTIMPacket friendpacket = new TTIMPacket();
-                                    friendpacket.setTYPE(TYPE.USERINFO_REQ);
-                                    ByteBuffer friendByteBuffer = ByteBuffer.allocate(50);
+                                    friendpacket.setTYPE(TYPE.FRIENDS_REQ);
+                                    ByteBuffer friendByteBuffer = ByteBuffer.allocate(20);
                                     friendByteBuffer.put(OprateOptions.GET);
-                                    friendByteBuffer.putInt(friendid);
                                     friendByteBuffer.flip();
                                     friendpacket.setBodylength(friendByteBuffer.remaining());
                                     friendpacket.setBody(friendByteBuffer.array());
                                     TtApplication.send(friendpacket);
-                                    Bundle fileBundle = new Bundle();
-                                    fileBundle.putInt("uid", friendid);
-                                    fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
-                                    new FileThread(MessageService.this, fileBundle, handler).start();
-                                }
+                                    //Bundle fileBundle = new Bundle();
+                                    //fileBundle.putInt("uid", friendid);
+                                    //fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
+                                    //new FileThread(MessageService.this, fileBundle, handler).start();
+
                                 //save login status(id and user bean) in sessionContext
                                 sessionContext.setLogin(true);
                                 sessionContext.setuID(currentUser.getUId());
@@ -340,22 +338,14 @@ public class MessageService extends Service {
                         editor.putString("currentUserName", currentUser.getUName());
                         editor.commit();
                         //get friends info from server
-                        List<Integer> friendlist = currentUser.getUFriendsList();
-                        for (int friendid : friendlist) {
                                 TTIMPacket friendpacket = new TTIMPacket();
-                                friendpacket.setTYPE(TYPE.USERINFO_REQ);
+                                friendpacket.setTYPE(TYPE.FRIENDS_REQ);
                                 ByteBuffer friendByteBuffer = ByteBuffer.allocate(50);
                                 friendByteBuffer.put(OprateOptions.GET);
-                                friendByteBuffer.putInt(friendid);
                                 friendByteBuffer.flip();
                                 friendpacket.setBodylength(friendByteBuffer.remaining());
                                 friendpacket.setBody(friendByteBuffer.array());
                                 TtApplication.send(friendpacket);
-                                Bundle fileBundle = new Bundle();
-                                fileBundle.putInt("uid", friendid);
-                                fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
-                                new FileThread(MessageService.this, fileBundle, handler).start();
-                        }
                         //save login status(id and user bean) in sessionContext
                         sessionContext.setLogin(true);
                         sessionContext.setuID(currentUser.getUId());
@@ -415,6 +405,11 @@ public class MessageService extends Service {
                                     String username = "未知用户";
                                     if (photo == null) {
                                         photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                                        Bundle fileBundle = new Bundle();
+                                        fileBundle.putInt("uid",message.getMFromId() );
+                                        fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
+                                        new FileThread(MessageService.this, fileBundle, handler).start();
+
                                     }
                                     if (cursor.moveToNext()) {
                                         username = cursor.getString(cursor.getColumnIndex("Uname"));
@@ -456,6 +451,10 @@ public class MessageService extends Service {
                                     Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + message.getMFromId() + ".png");
                                     if (photo == null) {
                                         photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                                        Bundle fileBundle = new Bundle();
+                                        fileBundle.putInt("uid",message.getMFromId() );
+                                        fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
+                                        new FileThread(MessageService.this, fileBundle, handler).start();
                                     }
                                     RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
                                     roundedBitmapDrawable.setCircular(true);
@@ -483,6 +482,10 @@ public class MessageService extends Service {
                                 Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + message.getMFromId() + ".png");
                                 if (photo == null) {
                                     photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                                    Bundle fileBundle = new Bundle();
+                                    fileBundle.putInt("uid",message.getMFromId() );
+                                    fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
+                                    new FileThread(MessageService.this, fileBundle, handler).start();
                                 }
                                 RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
                                 roundedBitmapDrawable.setCircular(true);
@@ -508,12 +511,11 @@ public class MessageService extends Service {
                 //receive message-----end
 
                 //userInfo start
-                case TYPE.USERINFO_RESP:
-                    Log.e(TAG, "user_info");
+                case TYPE.FRIENDS_RESP:
+                    Log.e(TAG, "friends~~");
                     if (body[0] == RESP_CODE.SUCCESS) {
-                        if (body[1] == OprateOptions.GET) {
-                            byte[] userbody = new byte[body.length - 2];
-                            System.arraycopy(body, 2, userbody, 0, userbody.length);
+                            byte[] userbody = new byte[body.length - 1];
+                            System.arraycopy(body, 1, userbody, 0, userbody.length);
                             try {
                                 TTUser getUser = TTUser.parseFrom(userbody);
                                 try {
@@ -538,14 +540,30 @@ public class MessageService extends Service {
                                     //update friendList
                                     FriendRecyclerViewItemAdapter friendRecyclerViewItemAdapter = mainActivity.getFriendRecyclerViewItemAdapter();
                                     List<FriendRecyclerViewItem> friendRecyclerViewItemList = mainActivity.getFriendRecyclerViewData();
+                                    boolean haveFriend=false;
                                     for (int i = 0; i < friendRecyclerViewItemList.size(); i++) {
                                         if (friendRecyclerViewItemList.get(i).getUId() == getUser.getUId()) {
                                             if (friendRecyclerViewItemList.get(i).getUsername() != getUser.getUName()) {
                                                 friendRecyclerViewItemList.get(i).setUsername(getUser.getUName());
                                                 friendRecyclerViewItemAdapter.notifyItemChanged(i);
                                             }
+                                            haveFriend=true;
                                             break;
                                         }
+                                    }
+                                    if(!haveFriend){
+                                        Bitmap photo = BitmapFactory.decodeFile(getFilesDir().getAbsolutePath() + "/head_portrait/" + getUser.getUId() + ".png");
+                                        if(photo==null){
+                                            photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                                            Bundle fileBundle = new Bundle();
+                                            fileBundle.putInt("uid",getUser.getUId());
+                                            fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
+                                            new FileThread(MessageService.this, fileBundle, handler).start();
+                                        }
+                                        RoundedBitmapDrawable friendDrawable=RoundedBitmapDrawableFactory.create(null,photo);
+                                        friendDrawable.setCircular(true);
+                                        friendRecyclerViewItemList.add(new FriendRecyclerViewItem(getUser.getUId(),friendDrawable,null,getUser.getUName()));
+                                        friendRecyclerViewItemAdapter.notifyDataSetChanged();
                                     }
                                     //update favoriteList UI
                                     FavoriteRecyclerViewItemAdapter favoriteRecyclerViewItemAdapter = mainActivity.getFavoriteRecyclerViewItemAdapter();
@@ -574,7 +592,6 @@ public class MessageService extends Service {
                             } catch (Exception e) {
                                 Log.e(TAG, e.getMessage() + e.getClass().getSimpleName());
                             }
-                        }
                     }
                     break;
                 //userInfo end
@@ -677,7 +694,11 @@ public class MessageService extends Service {
                                 }
                             }
                             if (favoritephoto == null) {
-                                photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                                favoritephoto = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                                Bundle fileBundle = new Bundle();
+                                fileBundle.putInt("uid",message.getMFromId() );
+                                fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
+                                new FileThread(MessageService.this, fileBundle, handler).start();
                             }
                             RoundedBitmapDrawable favoriteroundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, favoritephoto);
                             favoriteroundedBitmapDrawable.setCircular(true);
@@ -689,6 +710,25 @@ public class MessageService extends Service {
 
                         }
                     }
+                    break;
+                case TYPE.JOIN_RESP:
+                    Log.e(TAG, "join...");
+                    if(body[0]==RESP_CODE.SUCCESS){
+                        if(body[1]==OprateOptions.ASK){
+                            byte[] messagebody = new byte[body.length - 2];
+                            System.arraycopy(body, 2, messagebody, 0, messagebody.length);
+                            try {
+                                TTMessage joinMessage=TTMessage.parseFrom(messagebody);
+                                database.execSQL("insert into requests(rcontent,rtime,fromid,toid,rtype) values(?,?,?,?,?)",new Object[]{joinMessage.getMContent(),joinMessage.getMTime(),joinMessage.getMFromId(),joinMessage.getMToId(),0});
+                                if(mainActivity!=null){
+                                    mainActivity.getNewFriendView().findViewById(R.id.friend_header_notification).setVisibility(View.VISIBLE);
+                                }
+                            } catch (InvalidProtocolBufferException e) {
+                               Log.e(TAG,e.getMessage());
+                            }
+                        }
+                    }
+                    break;
             }
         }
     }

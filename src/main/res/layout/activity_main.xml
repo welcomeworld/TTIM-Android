@@ -47,7 +47,8 @@
             android:id="@+id/main_viewpager"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"></cn.dmandp.view.MyViewPager>
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        </cn.dmandp.view.MyViewPager>
 
         <android.support.design.widget.BottomNavigationView
             style="@style/Widget.Design.BottomNavigationView"
@@ -68,7 +69,8 @@
         android:background="@color/white"
         android:layout_gravity="start"
         app:itemBackground="@color/white"
-        app:menu="@menu/navigation_menu_main"></android.support.design.widget.NavigationView>
+        app:menu="@menu/navigation_menu_main">
+    </android.support.design.widget.NavigationView>
 
     <cn.dmandp.view.LoadView
         android:id="@+id/main_loadview"

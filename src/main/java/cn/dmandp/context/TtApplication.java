@@ -4,6 +4,7 @@ import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.Intent;
 import android.graphics.Color;
 import android.util.Log;
 import java.net.InetSocketAddress;
@@ -16,6 +17,7 @@ import cn.dmandp.common.TYPE;
 import cn.dmandp.entity.TTIMPacket;
 import cn.dmandp.entity.TTUser;
 import cn.dmandp.netio.SendThread;
+import cn.dmandp.service.MessageService;
 
 /**
  * Created by 萌即正义 on 27/03/2018.
@@ -28,6 +30,8 @@ public class TtApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Intent serviceIntent=new Intent(TtApplication.this, MessageService.class);
+        startService(serviceIntent);
         notificationChannelInit();
         new Thread(new Runnable() {
             @Override
