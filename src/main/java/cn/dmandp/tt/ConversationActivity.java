@@ -36,6 +36,8 @@ import cn.dmandp.entity.ConversationListItem;
 import cn.dmandp.entity.FavoriteRecyclerViewItem;
 import cn.dmandp.entity.TTIMPacket;
 import cn.dmandp.entity.TTMessage;
+import cn.dmandp.netio.FileThread;
+import cn.dmandp.service.MessageService;
 
 /**
  * Created by 萌即正义 on 15/03/2018.
@@ -170,6 +172,10 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
                 Bitmap userPhoto = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + currentUserId + ".png");
                 if (userPhoto == null) {
                     userPhoto = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                    Bundle fileBundle = new Bundle();
+                    fileBundle.putInt("uid",currentUserId );
+                    fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
+                    new FileThread(ConversationActivity.this, fileBundle, MessageService.getInstance().getHandler()).start();
                 }
                 RoundedBitmapDrawable userRoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, userPhoto);
                 userRoundedBitmapDrawable.setCircular(true);
@@ -206,11 +212,19 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
             Bitmap userPhoto = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + currentUserId + ".png");
             if (photo == null) {
                 photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                Bundle fileBundle = new Bundle();
+                fileBundle.putInt("uid",chatUserId );
+                fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
+                new FileThread(ConversationActivity.this, fileBundle, MessageService.getInstance().getHandler()).start();
             }
             RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
             roundedBitmapDrawable.setCircular(true);
             if (userPhoto == null) {
                 userPhoto = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                Bundle fileBundle = new Bundle();
+                fileBundle.putInt("uid",currentUserId );
+                fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
+                new FileThread(ConversationActivity.this, fileBundle, MessageService.getInstance().getHandler()).start();
             }
             RoundedBitmapDrawable userRoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, userPhoto);
             userRoundedBitmapDrawable.setCircular(true);

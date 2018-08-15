@@ -55,7 +55,8 @@ public class SendThread extends Thread {
                 Log.e("SendThread", packet.getTYPE() + "send success");
             }
         } catch (Exception e) {
-            Log.e("SendThread", packet.getTYPE() + "send fail");
+            Log.e("SendThread", packet.getTYPE() + "send fail because:"+e.getMessage());
+            e.printStackTrace();
         }
     }
 }

@@ -30,4 +30,8 @@
     <string name="advertisement">广告推广</string>
     <string name="friends">好友</string>
     <string name="new_friends">新的朋友</string>
+    <string name="friend_request">好友申请</string>
+    <string name="nothing">  </string>
+    <string name="agree">同意</string>
+    <string name="reject">拒绝</string>
 </resources>
