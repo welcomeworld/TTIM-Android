@@ -41,7 +41,7 @@ public class NewFriendActivity extends BaseActivity {
         SharedPreferences data = getSharedPreferences("data", MODE_PRIVATE);
         currentUserId = data.getInt("currentUserId", -1);
         newFriendRecyclerView = findViewById(R.id.recyclerview_newfriend_main);
-        Cursor cursor=database.rawQuery("select * from requests where toid=? and rtype=?",new String[]{currentUserId+"",0+""});
+        Cursor cursor=database.rawQuery("select * from requests where toid=? and rtype=? order by rtime desc",new String[]{currentUserId+"",0+""});
         while(cursor.moveToNext()){
             newFriendRecyclerViewItemList.add(new NewFriendRecyclerViewItem(cursor.getInt(cursor.getColumnIndex("fromid")),cursor.getInt(cursor.getColumnIndex("fromid"))+"",cursor.getString(cursor.getColumnIndex("rcontent")),cursor.getLong(cursor.getColumnIndex("rtime")),cursor.getInt(cursor.getColumnIndex("rstatus")),null));
         }

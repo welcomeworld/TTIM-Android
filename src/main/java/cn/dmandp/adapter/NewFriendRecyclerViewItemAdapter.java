@@ -5,6 +5,7 @@
 package cn.dmandp.adapter;
 
 import android.app.AlertDialog;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -28,15 +29,20 @@ import java.util.Locale;
 import cn.dmandp.common.OprateOptions;
 import cn.dmandp.common.TYPE;
 import cn.dmandp.context.TtApplication;
+import cn.dmandp.dao.TTIMDaoHelper;
 import cn.dmandp.entity.NewFriendRecyclerViewItem;
 import cn.dmandp.entity.TTIMPacket;
 import cn.dmandp.entity.TTMessage;
+import cn.dmandp.service.MessageService;
 import cn.dmandp.tt.R;
 
 public class NewFriendRecyclerViewItemAdapter extends RecyclerView.Adapter {
+    TTIMDaoHelper daoHelper = new TTIMDaoHelper(MessageService.getInstance());
+    SQLiteDatabase database;
     ArrayList<NewFriendRecyclerViewItem> data;
     public NewFriendRecyclerViewItemAdapter(List<NewFriendRecyclerViewItem> data){
         this.data= (ArrayList<NewFriendRecyclerViewItem>) data;
+        database=daoHelper.getReadableDatabase();
     }
 
     @NonNull
@@ -98,6 +104,7 @@ public class NewFriendRecyclerViewItemAdapter extends RecyclerView.Adapter {
                             viewHolder.spinner.setVisibility(View.GONE);
                             viewHolder.statusText.setVisibility(View.VISIBLE);
                             viewHolder.statusText.setText("已同意");
+                            database.execSQL("update requests set rstatus=? where fromid=? and toid=? and rtime=?",new Object[]{1,item.getUId(),TtApplication.getSessionContext().getuID(),item.getTime()});
                             break;
                         case 1:
                             changeBuffer.put(OprateOptions.ANSWER);
@@ -111,6 +118,7 @@ public class NewFriendRecyclerViewItemAdapter extends RecyclerView.Adapter {
                             viewHolder.spinner.setVisibility(View.GONE);
                             viewHolder.statusText.setVisibility(View.VISIBLE);
                             viewHolder.statusText.setText("已拒绝");
+                            database.execSQL("update requests set rstatus=? where fromid=? and toid=? and rtime=?",new Object[]{2,item.getUId(),TtApplication.getSessionContext().getuID(),item.getTime()});
                             break;
                     }
                 }

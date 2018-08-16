@@ -25,7 +25,7 @@
         </activity>
         <activity
             android:name=".MainActivity"
-            android:launchMode="singleInstance">
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="cn.dmandp.tt.action.MAINACTIVITY" />
@@ -35,7 +35,7 @@
         </activity>
         <activity
             android:name=".ConversationActivity"
-            android:launchMode="singleInstance">
+            android:launchMode="standard">
             <intent-filter>
                 <action android:name="cn.dmandp.tt.action.CONVERSATIONACTIVITY" />
                 <action android:name="android.intent.action.VIEW" />
@@ -55,11 +55,13 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".PersonInfoActivity"></activity>
-        <activity android:name=".NewFriendActivity"></activity>
+        <activity android:name=".PersonInfoActivity">
+        </activity>
+        <activity android:name=".NewFriendActivity">
+        </activity>
         <service
             android:name="cn.dmandp.service.MessageService"
-            android:enabled="true"></service>
+            android:enabled="true">
+        </service>
     </application>
-
 </manifest>
