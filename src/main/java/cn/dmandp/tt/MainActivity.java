@@ -15,6 +15,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -41,10 +43,12 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -302,8 +306,67 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.navigation_menu_item_theme:
-                        ThemeUtil.setTheme(R.style.AppTheme_pink);
-                        recreate();
+                        AlertDialog.Builder builder=new AlertDialog.Builder(MainActivity.this,R.style.dialog_anim);
+
+                        AlertDialog themeDialog=builder.create();
+                        themeDialog.show();
+                        themeDialog.setContentView(R.layout.dialog_theme);
+                        ImageButton themeButton=themeDialog.findViewById(R.id.theme_dialog_blue);
+                        themeButton.setColorFilter(0xFF03A9F4);
+                        themeButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                ThemeUtil.setTheme(R.style.AppTheme);
+                                recreate();
+                            }
+                        });
+
+                        themeButton=themeDialog.findViewById(R.id.theme_dialog_pink);
+                        themeButton.setColorFilter(0xFFFF4081);
+                        themeButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                ThemeUtil.setTheme(R.style.AppTheme_pink);
+                                recreate();
+                            }
+                        });
+
+                        themeButton=themeDialog.findViewById(R.id.theme_dialog_purple);
+                        themeButton.setColorFilter(0xFF800080);
+                        themeButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                ThemeUtil.setTheme(R.style.AppTheme_purple);
+                                recreate();
+                            }
+                        });
+
+                        themeButton=themeDialog.findViewById(R.id.theme_dialog_violet);
+                        themeButton.setColorFilter(0xFFEE82EE);
+                        themeButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                ThemeUtil.setTheme(R.style.AppTheme_violet);
+                                recreate();
+                            }
+                        });
+
+                        themeButton=themeDialog.findViewById(R.id.theme_dialog_yellow);
+                        themeButton.setColorFilter(0xFFFFFF00);
+                        themeButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                ThemeUtil.setTheme(R.style.AppTheme_yellow);
+                                recreate();
+                            }
+                        });
+
+                        themeDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                        WindowManager.LayoutParams dialogParams=themeDialog.getWindow().getAttributes();
+                        dialogParams.gravity=Gravity.RIGHT;
+                        dialogParams.width= (int) (88*getResources().getDisplayMetrics().density+0.5f);
+                        themeDialog.getWindow().setAttributes(dialogParams);
+                        themeDialog.getWindow().setWindowAnimations(R.style.dialog_anim);
                         break;
                     case R.id.navigation_menu_item_copyright:
                         Snackbar.make(navigationView, R.string.copyRight, Snackbar.LENGTH_LONG).show();
@@ -525,12 +588,22 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         View friendRefreshView = LayoutInflater.from(this).inflate(R.layout.recyclerview_refresh, friendListView, false);
         refreshFriendAdapter.addHeaderView(friendRefreshView);
         newFriendView = LayoutInflater.from(this).inflate(R.layout.recyclerview_friend_header, friendListView, false);
+        SharedPreferences messageSharedPreferences = getSharedPreferences("message", MODE_PRIVATE);
+        final SharedPreferences.Editor editor = messageSharedPreferences.edit();
+        int newFriendCount = messageSharedPreferences.getInt("newfriend" + currentUserId, 0);
+        if(newFriendCount==0){
+            newFriendView.findViewById(R.id.friend_header_notification).setVisibility(View.GONE);
+        }else{
+            newFriendView.findViewById(R.id.friend_header_notification).setVisibility(View.VISIBLE);
+        }
         newFriendView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent newFriendIntent = new Intent(MainActivity.this, NewFriendActivity.class);
                 startActivity(newFriendIntent);
                 findViewById(R.id.friend_header_notification).setVisibility(View.GONE);
+                editor.putInt("newfriend" + currentUserId,0);
+                editor.commit();
             }
         });
         refreshFriendAdapter.addHeaderView(newFriendView);

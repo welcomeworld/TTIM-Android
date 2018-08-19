@@ -43,7 +43,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_gravity="center"
-            android:background="@drawable/new_message"
+            android:background="@drawable/circle_24dp"
             android:visibility="gone"/>
     </LinearLayout>
 </LinearLayout>

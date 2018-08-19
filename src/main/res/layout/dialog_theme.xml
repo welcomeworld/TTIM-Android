@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2018. welcomeworld All rights reserved
+  -->
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_gravity="center_vertical"
+    android:layout_height="wrap_content">
+    <ImageButton
+        android:id="@+id/theme_dialog_blue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/circle_64dp"
+        android:background="@color/transparent"
+        android:layout_marginBottom="8dp"/>
+    <ImageButton
+        android:id="@+id/theme_dialog_pink"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/circle_64dp"
+        android:background="@color/transparent"
+        android:layout_marginBottom="8dp"/>
+    <ImageButton
+        android:id="@+id/theme_dialog_purple"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/circle_64dp"
+        android:background="@color/transparent"
+        android:layout_marginBottom="8dp"/>
+    <ImageButton
+        android:id="@+id/theme_dialog_violet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/circle_64dp"
+        android:background="@color/transparent"
+        android:layout_marginBottom="8dp"/>
+    <ImageButton
+        android:id="@+id/theme_dialog_yellow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/circle_64dp"
+        android:background="@color/transparent"
+        android:layout_marginBottom="8dp"/>
+</LinearLayout>

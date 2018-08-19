@@ -720,6 +720,10 @@ public class MessageService extends Service {
                             try {
                                 TTMessage joinMessage=TTMessage.parseFrom(messagebody);
                                 database.execSQL("insert into requests(rcontent,rtime,fromid,toid,rtype) values(?,?,?,?,?)",new Object[]{joinMessage.getMContent(),joinMessage.getMTime(),joinMessage.getMFromId(),joinMessage.getMToId(),0});
+                                SharedPreferences messageSharedPreferences = getSharedPreferences("message", MODE_PRIVATE);
+                                SharedPreferences.Editor editor = messageSharedPreferences.edit();
+                                editor.putInt("newfriend" + currentUserId,1);
+                                editor.commit();
                                 if(mainActivity!=null){
                                     mainActivity.getNewFriendView().findViewById(R.id.friend_header_notification).setVisibility(View.VISIBLE);
                                 }

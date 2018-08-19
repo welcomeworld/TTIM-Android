@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#03A9F4</color>
-    <color name="colorPrimaryDark">#03A9F4</color>
-    <color name="colorAccent">#FF4081</color>
-    <color name="colorLogin">#1874CD</color>
-    <color name="light_blue">#18B4ED</color>
+    <color name="colorAccent">#03A9F4</color>
+    <color name="colorLogin">#03A9F4</color>
+    <color name="light_blue">#03A9F4</color>
+    <color name="pink">#FF4081</color>
+    <color name="deep_blue">#1874CD</color>
+    <color name="purple">#800080</color>
+    <color name="violet">#EE82EE</color>
+    <color name="yellow">#FFFF00</color>
     <color name="gray">#EBECEE</color>
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
 </resources>
