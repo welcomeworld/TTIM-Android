@@ -2,10 +2,38 @@
   ~ Copyright (c) 2018. welcomeworld All rights reserved
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/conversation_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="?actionBarSize"
+            app:theme="@style/main_toolbar"
+            app:title="@string/message"
+            app:contentInsetStart="0dp"
+            app:contentInsetStartWithNavigation="0dp">
+            <TextView
+                android:id="@+id/toolbar_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:textSize="20dp"
+                android:lines="1"
+                android:ellipsize="end"
+                android:background="@color/transparent"
+                android:textColor="@color/white"
+                android:text="@string/friend_request"/>
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
 
     <cn.dmandp.view.RefreshRecyclerView
         android:id="@+id/recyclerview_newfriend_main"

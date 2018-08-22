@@ -10,11 +10,14 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
@@ -101,6 +104,11 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
             chatUserName = "未知";
         }
         friendCursor.close();
+        Toolbar toolbar=findViewById(R.id.conversation_toolbar);
+        TextView title=toolbar.findViewById(R.id.toolbar_title);
+        title.setText(chatUserName);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         //select messages list
         if (allMessages.get(chatUserId) != null) {
             messages = allMessages.get(chatUserId);
@@ -154,6 +162,17 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
         messagelistview.setAdapter(adapter);
     }
 
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                finish();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -171,7 +190,7 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
                 TtApplication.send(messagePacket);
                 Bitmap userPhoto = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + currentUserId + ".png");
                 if (userPhoto == null) {
-                    userPhoto = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                    userPhoto = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
                     Bundle fileBundle = new Bundle();
                     fileBundle.putInt("uid",currentUserId );
                     fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
@@ -179,7 +198,7 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
                 }
                 RoundedBitmapDrawable userRoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, userPhoto);
                 userRoundedBitmapDrawable.setCircular(true);
-                ChatMessage newMessage = new ChatMessage(userRoundedBitmapDrawable, currentUserName, messagetext.getText() + "", message.getMTime(), 0);
+                ChatMessage newMessage = new ChatMessage(userRoundedBitmapDrawable, currentUserName, messagetext.getText() + "", message.getMTime(), 0,message.getMFromId());
                 messagetext.setText("");
                 messages.add(newMessage);
                 adapter.notifyDataSetChanged();
@@ -211,7 +230,7 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
             Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + chatUserId + ".png");
             Bitmap userPhoto = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + currentUserId + ".png");
             if (photo == null) {
-                photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                photo = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
                 Bundle fileBundle = new Bundle();
                 fileBundle.putInt("uid",chatUserId );
                 fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
@@ -220,7 +239,7 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
             RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
             roundedBitmapDrawable.setCircular(true);
             if (userPhoto == null) {
-                userPhoto = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                userPhoto = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
                 Bundle fileBundle = new Bundle();
                 fileBundle.putInt("uid",currentUserId );
                 fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
@@ -233,9 +252,9 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
             Long mtime = message.getLong(message.getColumnIndex("Mtime"));
             int fromid = message.getInt(message.getColumnIndex("Fromid"));
             if (fromid == currentUserId) {
-                messages.add(new ChatMessage(userRoundedBitmapDrawable, currentUserName + "", mcontent, mtime, 0));
+                messages.add(new ChatMessage(userRoundedBitmapDrawable, currentUserName + "", mcontent, mtime, 0,fromid));
             } else {
-                messages.add(new ChatMessage(roundedBitmapDrawable, chatUserName + "", mcontent, mtime, 1));
+                messages.add(new ChatMessage(roundedBitmapDrawable, chatUserName + "", mcontent, mtime, 1,fromid));
             }
         }
         message.close();

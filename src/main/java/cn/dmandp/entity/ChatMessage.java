@@ -14,12 +14,19 @@ public class ChatMessage {
     private long time;
     private int type;
 
-    public ChatMessage(Drawable touxiang, String name, String message, long time, int type) {
+    public int getUid() {
+        return uid;
+    }
+
+    private int uid;
+
+    public ChatMessage(Drawable touxiang, String name, String message, long time, int type,int uid) {
         this.touxiang = touxiang;
         this.name = name;
         this.message = message;
         this.time = time;
         this.type = type;
+        this.uid=uid;
     }
 
     public Drawable getTouxiang() {

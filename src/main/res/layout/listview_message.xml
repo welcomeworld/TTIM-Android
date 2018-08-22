@@ -54,11 +54,11 @@
                 android:background="@drawable/right_message_normal" />
         </LinearLayout>
 
-        <ImageView
+        <ImageButton
             android:id="@+id/touxiang_right"
             android:layout_width="64dp"
             android:layout_height="64dp"
-            tools:src="@drawable/ty"
+            tools:src="@drawable/logo"
             android:contentDescription="@string/image_description"
             android:layout_marginRight="8dp"
             android:layout_marginEnd="8dp"
@@ -72,11 +72,11 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <ImageView
+        <ImageButton
             android:id="@+id/touxiang_left"
             android:layout_width="64dp"
             android:layout_height="64dp"
-            android:src="@drawable/ty"
+            android:src="@drawable/logo"
             android:contentDescription="@string/image_description"
             android:layout_marginStart="8dp"
             android:layout_marginLeft="8dp"

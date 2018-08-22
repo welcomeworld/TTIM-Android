@@ -45,6 +45,7 @@ public class PersonInfoActivity extends BaseActivity {
     final private int PHOTO_CROP_REQUEST = 3;
     ImageButton personInfo_photo_button;
     TextView personInfo_username;
+    TextView personInfo_userid;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,11 +66,13 @@ public class PersonInfoActivity extends BaseActivity {
         }
         personInfo_username = findViewById(R.id.personinfo_username);
         personInfo_username.setText(personInfoUserName);
+        personInfo_userid=findViewById(R.id.personinfo_userid);
+        personInfo_userid.setText("uid:"+personInfoUserId);
         personInfo_photo_button = findViewById(R.id.personinfo_photo);
         Bitmap photo = BitmapFactory.decodeFile(getFilesDir().getAbsolutePath() + "/head_portrait/" + personInfoUserId + ".png");
         if (photo == null) {
             Log.e("MessageService", "File is not exist");
-            photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+            photo = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
             Bundle fileBundle = new Bundle();
             fileBundle.putInt("uid",personInfoUserId);
             fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
@@ -78,16 +81,18 @@ public class PersonInfoActivity extends BaseActivity {
         RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
         roundedBitmapDrawable.setCircular(true);
         personInfo_photo_button.setImageDrawable(roundedBitmapDrawable);
-        personInfo_photo_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                intent.setType("image/png");
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                startActivityForResult(Intent.createChooser(intent, "请选择你的头像文件"), CONTENT_PHOTO_REQUEST);
-            }
-        });
+        if(personInfoUserId==currentUserId){
+            personInfo_photo_button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent();
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    intent.setType("image/png");
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    startActivityForResult(Intent.createChooser(intent, "请选择你的头像文件"), CONTENT_PHOTO_REQUEST);
+                }
+            });
+        }
     }
 
     private void dataInit() {
@@ -100,9 +105,6 @@ public class PersonInfoActivity extends BaseActivity {
             imageCrop(data.getData());
         }
         if (resultCode == Activity.RESULT_OK && requestCode == PHOTO_CROP_REQUEST) {
-            //  if(data!=null){
-            // Bundle bundle=data.getExtras();
-            //if(bundle!=null){
             Bitmap photo = BitmapFactory.decodeFile(getExternalCacheDir() + "/temp.png");
             if (photo == null) {
                 return;

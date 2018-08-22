@@ -404,7 +404,7 @@ public class MessageService extends Service {
                                     Cursor cursor = database.rawQuery("select * from friends where uid=? and friendid=?", new String[]{sessionContext.getuID() + "", message.getMFromId() + ""});
                                     String username = "未知用户";
                                     if (photo == null) {
-                                        photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                                        photo = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
                                         Bundle fileBundle = new Bundle();
                                         fileBundle.putInt("uid",message.getMFromId() );
                                         fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
@@ -450,7 +450,7 @@ public class MessageService extends Service {
                                 if (conversationActivity.getAllMessages().get(message.getMFromId()) != null) {
                                     Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + message.getMFromId() + ".png");
                                     if (photo == null) {
-                                        photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                                        photo = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
                                         Bundle fileBundle = new Bundle();
                                         fileBundle.putInt("uid",message.getMFromId() );
                                         fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
@@ -466,7 +466,7 @@ public class MessageService extends Service {
                                     } else {
                                         chatUserName = "未知";
                                     }
-                                    conversationActivity.getAllMessages().get(message.getMFromId()).add(new ChatMessage(roundedBitmapDrawable, chatUserName + "", message.getMContent(), message.getMTime(), 1));
+                                    conversationActivity.getAllMessages().get(message.getMFromId()).add(new ChatMessage(roundedBitmapDrawable, chatUserName + "", message.getMContent(), message.getMTime(), 1,message.getMFromId()));
                                 }
                                 List<ChatMessage> messages = conversationActivity.getMessages();
                                 //chatting with message sender
@@ -481,7 +481,7 @@ public class MessageService extends Service {
                             if (!foregroundFlage) {
                                 Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + message.getMFromId() + ".png");
                                 if (photo == null) {
-                                    photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                                    photo = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
                                     Bundle fileBundle = new Bundle();
                                     fileBundle.putInt("uid",message.getMFromId() );
                                     fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
@@ -492,7 +492,7 @@ public class MessageService extends Service {
                                 Intent resultIntent = new Intent(MessageService.this, MainActivity.class);
                                 PendingIntent resultPendingIntent = PendingIntent.getActivity(MessageService.this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                                 NotificationCompat.Builder builder = new NotificationCompat.Builder(MessageService.this, "highChannel");
-                                builder.setSmallIcon(R.drawable.ty);
+                                builder.setSmallIcon(R.drawable.logo);
                                 builder.setLargeIcon(ImageUtil.drawToBitmap(roundedBitmapDrawable));
                                 builder.setContentText(message.getMContent());
                                 builder.setContentTitle(message.getMFromId() + "");
@@ -554,7 +554,7 @@ public class MessageService extends Service {
                                     if(!haveFriend){
                                         Bitmap photo = BitmapFactory.decodeFile(getFilesDir().getAbsolutePath() + "/head_portrait/" + getUser.getUId() + ".png");
                                         if(photo==null){
-                                            photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                                            photo = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
                                             Bundle fileBundle = new Bundle();
                                             fileBundle.putInt("uid",getUser.getUId());
                                             fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
@@ -694,7 +694,7 @@ public class MessageService extends Service {
                                 }
                             }
                             if (favoritephoto == null) {
-                                favoritephoto = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                                favoritephoto = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
                                 Bundle fileBundle = new Bundle();
                                 fileBundle.putInt("uid",message.getMFromId() );
                                 fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);

@@ -564,7 +564,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                         if (cursor.moveToNext()) {
                             Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + uId + ".png");
                             if (photo == null) {
-                                photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                                photo = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
                                 Bundle fileBundle = new Bundle();
                                 fileBundle.putInt("uid",uId);
                                 fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
@@ -685,7 +685,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         });
         refreshFavoriteAdapter = new HeaderAndFooterAdapter(favoriteRecyclerViewItemAdapter);
         favoriteListView.setAdapter(refreshFavoriteAdapter);
-        favoriteListView.addItemDecoration(new MyDividerItemDecoration());
         favoriteListView.setItemAnimator(new DefaultItemAnimator());
         favoriteListView.addRefreshViewCreator(new DefaultRefreshCreator());
         favoriteListView.setOnRefreshListener(new RefreshRecyclerView.OnRefreshListener() {
@@ -820,7 +819,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             String uname = cursor.getString(cursor.getColumnIndex("Uname"));
             Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + friendid + ".png");
             if (photo == null) {
-                photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                photo = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
                 Bundle fileBundle = new Bundle();
                 fileBundle.putInt("uid",friendid);
                 fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
@@ -845,7 +844,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         friendRecyclerViewItemAdapter.notifyDataSetChanged();
         Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + currentUserId + ".png");
         if (photo == null) {
-            photo = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+            photo = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
             Bundle fileBundle = new Bundle();
             fileBundle.putInt("uid",currentUserId);
             fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
@@ -862,7 +861,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         while (favorites.moveToNext()) {
             Bitmap favoritephoto = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + favorites.getInt(favorites.getColumnIndex("fromid")) + ".png");
             if (favoritephoto == null) {
-                favoritephoto = BitmapFactory.decodeResource(getResources(), R.drawable.ty);
+                favoritephoto = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
                 Bundle fileBundle = new Bundle();
                 fileBundle.putInt("uid",favorites.getInt(favorites.getColumnIndex("fromid")));
                 fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);

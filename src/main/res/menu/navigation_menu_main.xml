@@ -8,10 +8,6 @@
         android:id="@+id/navigation_menu_item_theme"
         android:title="@string/theme"
         android:icon="@mipmap/ic_launcher" />
-    <item
-        android:id="@+id/navigation_menu_item_advertisement"
-        android:title="@string/advertisement"
-        android:icon="@mipmap/ic_launcher" />
     <group android:id="@+id/version_group">
         <item
             android:id="@+id/navigation_menu_item_about"

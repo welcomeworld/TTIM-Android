@@ -13,7 +13,10 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +40,9 @@ public class NewFriendActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_newfriend);
+        Toolbar toolbar=findViewById(R.id.conversation_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         database=daoHelper.getReadableDatabase();
         SharedPreferences data = getSharedPreferences("data", MODE_PRIVATE);
         currentUserId = data.getInt("currentUserId", -1);
@@ -53,4 +59,15 @@ public class NewFriendActivity extends BaseActivity {
         newFriendRecyclerView.setItemAnimator(new DefaultItemAnimator());
         newFriendRecyclerView.addItemDecoration(new MyDividerItemDecoration());
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                finish();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }
+
