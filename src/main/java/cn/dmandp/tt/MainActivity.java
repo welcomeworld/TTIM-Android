@@ -307,7 +307,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 switch (item.getItemId()) {
                     case R.id.navigation_menu_item_theme:
                         AlertDialog.Builder builder=new AlertDialog.Builder(MainActivity.this,R.style.dialog_anim);
-
                         AlertDialog themeDialog=builder.create();
                         themeDialog.show();
                         themeDialog.setContentView(R.layout.dialog_theme);
@@ -673,13 +672,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     } catch (Exception e) {
                         Log.e(TAG, e.getMessage());
                     }
-
                 } else if (view.getId() == R.id.recyclerview_favorite_share) {
-                    Toast.makeText(MainActivity.this, "you onclick:share", Toast.LENGTH_LONG).show();
-                } else if (view.getId() == R.id.recyclerview_favorite_card) {
-                    Toast.makeText(MainActivity.this, "you onclick:card", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(MainActivity.this, "you onclick:" + view.getId(), Toast.LENGTH_LONG).show();
+                    Intent shareIntent=new Intent(Intent.ACTION_SEND);
+                    shareIntent.setType("text/plain");
+                    shareIntent.putExtra(Intent.EXTRA_TEXT,currentView.getMessage());
+                    startActivity(Intent.createChooser(shareIntent,"分享到"));
                 }
             }
         });

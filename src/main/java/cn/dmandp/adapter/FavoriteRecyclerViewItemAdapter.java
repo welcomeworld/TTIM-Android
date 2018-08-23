@@ -62,12 +62,6 @@ public class FavoriteRecyclerViewItemAdapter extends RecyclerView.Adapter<Favori
                     onItemClickListener.onItemClick(v, currentView);
                 }
             });
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    onItemClickListener.onItemClick(view, currentView);
-                }
-            });
         }
     }
 
