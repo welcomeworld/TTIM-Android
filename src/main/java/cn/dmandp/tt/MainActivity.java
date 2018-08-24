@@ -371,6 +371,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                         Snackbar.make(navigationView, R.string.copyRight, Snackbar.LENGTH_LONG).show();
                         break;
                     case R.id.navigation_menu_item_about:
+                        Intent aboutIntent=new Intent(MainActivity.this,AboutActivity.class);
+                        startActivity(aboutIntent);
                         break;
                     case R.id.navigation_menu_item_logout:
                         Intent logoutIntent = new Intent(MainActivity.this, LoginActivity.class);

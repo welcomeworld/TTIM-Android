@@ -34,4 +34,9 @@
     <string name="nothing">  </string>
     <string name="agree">同意</string>
     <string name="reject">拒绝</string>
+    <string name="version_tip">已经是最新版本</string>
+    <string name="update_version">版本更新</string>
+    <string name="code_source">源代码</string>
+    <string name="talk_author">与作者交流</string>
+    <string name="version_name">1.0.0</string>
 </resources>

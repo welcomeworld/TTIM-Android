@@ -41,7 +41,6 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
                 <data
                     android:host="conversation"
                     android:scheme="ttim" />
@@ -58,6 +57,8 @@
         <activity android:name=".PersonInfoActivity">
         </activity>
         <activity android:name=".NewFriendActivity">
+        </activity>
+        <activity android:name=".AboutActivity">
         </activity>
         <service
             android:name="cn.dmandp.service.MessageService"
