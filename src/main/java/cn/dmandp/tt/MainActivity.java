@@ -305,6 +305,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
+                    case R.id.navigation_menu_item_settings:
+                        Intent settingIntent=new Intent(MainActivity.this,SettingActivity.class);
+                        startActivity(settingIntent);
+                        break;
                     case R.id.navigation_menu_item_theme:
                         AlertDialog.Builder builder=new AlertDialog.Builder(MainActivity.this,R.style.dialog_anim);
                         AlertDialog themeDialog=builder.create();

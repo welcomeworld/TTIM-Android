@@ -13,11 +13,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
@@ -478,7 +480,7 @@ public class MessageService extends Service {
                                 }
                             }
                             //app in background
-                            if (!foregroundFlage) {
+                            if (!foregroundFlage&& PreferenceManager.getDefaultSharedPreferences(MessageService.this).getBoolean("notification",true)) {
                                 Bitmap photo = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + message.getMFromId() + ".png");
                                 if (photo == null) {
                                     photo = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
@@ -498,7 +500,13 @@ public class MessageService extends Service {
                                 builder.setContentTitle(message.getMFromId() + "");
                                 builder.setContentIntent(resultPendingIntent);
                                 builder.setNumber(messageCount == -1 ? 1 : messageCount + 1);
-                                builder.setDefaults(Notification.DEFAULT_ALL);
+                                String soundUri=PreferenceManager.getDefaultSharedPreferences(MessageService.this).getString("notification_ring","none");
+                                if(soundUri.equalsIgnoreCase("none")){
+                                    builder.setDefaults(Notification.DEFAULT_ALL);
+                                }else {
+                                    builder.setSound(Uri.parse(soundUri));
+                                    builder.setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE);
+                                }
                                 Notification notification = builder.build();
                                 NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                                 notificationManager.notify(message.getMFromId(), notification);

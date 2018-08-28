@@ -12,4 +12,12 @@
         <item>@string/agree</item>
         <item>@string/reject</item>
     </string-array>
+    <string-array name="setting_languages">
+        <item>@string/chinese</item>
+        <item>@string/english</item>
+    </string-array>
+    <string-array name="setting_languages_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
 </resources>

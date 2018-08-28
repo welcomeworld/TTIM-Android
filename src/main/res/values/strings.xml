@@ -39,4 +39,19 @@
     <string name="code_source">源代码</string>
     <string name="talk_author">与作者交流</string>
     <string name="version_name">1.0.0</string>
+    <string name="language">语言</string>
+    <string name="chinese">中文</string>
+    <string name="english">英文</string>
+    <string name="clear_cache">清理缓存</string>
+    <string name="flow_count">流量统计</string>
+    <string name="clear_cache_message">清理缓存后聊天记录将会清空！\n是否清理缓存?</string>
+    <string name="notification_on">开启通知</string>
+    <string name="notification_on_summary">当前允许新消息通知</string>
+    <string name="notification_off_summary">已关闭通知</string>
+    <string name="cancel">取消</string>
+    <string name="confirm">确认</string>
+    <string name="notification_ring">通知铃声</string>
+    <string name="have_use">已使用：\n</string>
+    <string name="up_flow">上行流量 \n</string>
+    <string name="down_flow">下行流量 </string>
 </resources>

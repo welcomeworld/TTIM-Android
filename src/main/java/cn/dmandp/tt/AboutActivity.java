@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -60,6 +61,15 @@ public class AboutActivity extends BaseActivity {
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG,e.getMessage());
         }
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                finish();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void updateCheck() {

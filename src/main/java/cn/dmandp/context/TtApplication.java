@@ -5,11 +5,17 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.os.Build;
+import android.preference.PreferenceManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.Locale;
 
 
 import cn.dmandp.common.Const;
@@ -30,6 +36,18 @@ public class TtApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Resources resources=getResources();
+        Configuration configuration=resources.getConfiguration();
+        String language=PreferenceManager.getDefaultSharedPreferences(this).getString("language","0");
+        Locale locale;
+        if(language.equalsIgnoreCase("0")){
+            locale=Locale.CHINESE;
+        }else{
+            locale=Locale.US;
+        }
+        configuration.locale=locale;
+        DisplayMetrics displayMetrics=resources.getDisplayMetrics();
+        resources.updateConfiguration(configuration,displayMetrics);
         Intent serviceIntent=new Intent(TtApplication.this, MessageService.class);
         startService(serviceIntent);
         notificationChannelInit();

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:key="language"
+        android:title="@string/language"
+        android:defaultValue="0"
+        android:entries="@array/setting_languages"
+        android:entryValues="@array/setting_languages_values"/>
+        <SwitchPreference
+            android:key="notification"
+            android:summaryOff="@string/notification_off_summary"
+            android:summaryOn="@string/notification_on_summary"
+            android:switchTextOn="@string/notification_on_summary"
+            android:switchTextOff="@string/notification_off_summary"
+            android:title="@string/notification_on"
+            android:defaultValue="true" />
+        <RingtonePreference
+            android:key="notification_ring"
+            android:title="@string/notification_ring"
+            android:defaultValue="none"/>
+    <Preference
+        android:key="clear_cache"
+        android:title="@string/clear_cache" />
+    <Preference
+        android:key="flow_count"
+        android:title="@string/flow_count"/>
+</PreferenceScreen>
