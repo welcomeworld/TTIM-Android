@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -91,7 +92,7 @@ public class MessageService extends Service {
     @Override
     public void onCreate() {
         instance = this;
-        Log.i("TTIM-MessageService", "MessageService onCreate");
+        Log.i(TAG, "MessageService onCreate");
         database = daoHelper.getReadableDatabase();
         handler = new TTIMHandler();
         super.onCreate();
@@ -99,7 +100,7 @@ public class MessageService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.i("TTIM-MessageService", "MessageService onDestroy");
+        Log.i(TAG, "MessageService onDestroy");
         super.onDestroy();
     }
 
@@ -109,11 +110,11 @@ public class MessageService extends Service {
         SharedPreferences.Editor databaseaddressedit = databaseaddress.edit();
         databaseaddressedit.putString("address", DebugDB.getAddressLog());
         databaseaddressedit.commit();
-        Log.e(TAG, DebugDB.getAddressLog());
+        Log.d(TAG, DebugDB.getAddressLog());
         //first start
         if (!start) {
             start = true;
-            Log.i("TTIM-MessageService", "MessageService onStartCommand");
+            Log.i(TAG, "MessageService onStartCommand");
             new Thread(new Runnable() {
                 ByteBuffer byteBuffer = ByteBuffer.allocate(Const.BYTEBUFFER_MAX);
 
@@ -137,7 +138,7 @@ public class MessageService extends Service {
                         SocketChannel socketChannel = sessionContext.getSocketChannel();
                         try {
                             readnum = socketChannel.read(byteBuffer);
-                            Log.e("TTIM-MessageService", "after read");
+                            Log.i(TAG, "after read");
                         } catch (Exception e) {
                             e.printStackTrace();
                             try {
@@ -173,7 +174,7 @@ public class MessageService extends Service {
                                 byte type = byteBuffer.get();
                                 //the message type is not what we want
                                 while (byteBuffer.hasRemaining() && !TYPES.contains(type)) {
-                                    Log.e(TAG, "舍弃" + type);
+                                    Log.d(TAG, "舍弃" + type);
                                     type = byteBuffer.get();
                                 }
                                 if (byteBuffer.remaining() < 4) {
@@ -186,7 +187,7 @@ public class MessageService extends Service {
                                     int length = byteBuffer.getInt();
                                     if (length <= byteBuffer.remaining() && length > 0) {
                                         //all fit then send to handle
-                                        Log.e(TAG, "package start to handle" + type);
+                                        Log.i(TAG, "package start to handle" + type);
                                         byte[] dst = new byte[length];
                                         byteBuffer.get(dst);
                                         Message msg = Message.obtain();
@@ -208,7 +209,7 @@ public class MessageService extends Service {
                                 byteBuffer.clear();
                             }
                         }
-                        Log.e(TAG, "num=" + readnum);
+                        Log.d(TAG, "num=" + readnum);
                     }
                 }
             }).start();
@@ -372,9 +373,9 @@ public class MessageService extends Service {
 
                 //receive message-----start
                 case TYPE.RECEIVE_RESP:
-                    Log.e(TAG, "RECEIVEing");
+                    Log.i(TAG, "RECEIVEing");
                     if (!sessionContext.isLogin()) {
-                        Log.e(TAG, "not Login");
+                        Log.i(TAG, "not Login");
                         break;
                     }
                     if (mainActivity != null && mainActivity.getRecyclerView().getmCurrentRefreshStatus() == mainActivity.getRecyclerView().REFRESH_STATUS_REFRESHING) {
@@ -386,13 +387,17 @@ public class MessageService extends Service {
                             byte[] messagebody = new byte[body.length - 1];
                             System.arraycopy(body, 1, messagebody, 0, messagebody.length);
                             TTMessage message = TTMessage.parseFrom(messagebody);
-                            try {
-                                //save to database
-                                database.execSQL("insert into messages values(?,?,?,?);", new Object[]{message.getMContent(), message.getMTime(), message.getMFromId(), message.getMToId()});
-                            } catch (SQLiteConstraintException e) {
-                                Log.e(TAG, e.getMessage());
-                                return;
+                            //save to database
+                            ContentValues messageContentValues=new ContentValues();
+                            messageContentValues.put("mcontent",message.getMContent());
+                            messageContentValues.put("Mtime",message.getMTime());
+                            messageContentValues.put("Fromid",message.getMFromId());
+                            messageContentValues.put("Toid",message.getMToId());
+                            long insertcount=database.insert("messages",null,messageContentValues);
+                            if(insertcount<0){
+                                break;
                             }
+                            //database.execSQL("insert into messages values(?,?,?,?);", new Object[]{message.getMContent(), message.getMTime(), message.getMFromId(), message.getMToId()});
                             SharedPreferences messagePreferences = getSharedPreferences("message", MODE_PRIVATE);
                             SharedPreferences.Editor messageEditor = messagePreferences.edit();
                             int messageCount = messagePreferences.getInt(message.getMFromId() + ":" + message.getMToId(), -1);
@@ -416,7 +421,7 @@ public class MessageService extends Service {
                                     if (cursor.moveToNext()) {
                                         username = cursor.getString(cursor.getColumnIndex("Uname"));
                                     }
-                                    RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+                                    RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(getResources(), photo);
                                     roundedBitmapDrawable.setCircular(true);
                                     SimpleDateFormat format = new SimpleDateFormat("HH:mm");
                                     ConversationListItem friend = new ConversationListItem(message.getMFromId(), username, message.getMContent(), format.format(new Date(message.getMTime())), 1 + "", roundedBitmapDrawable);
@@ -458,7 +463,7 @@ public class MessageService extends Service {
                                         fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
                                         new FileThread(MessageService.this, fileBundle, handler).start();
                                     }
-                                    RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+                                    RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(getResources(), photo);
                                     roundedBitmapDrawable.setCircular(true);
                                     SimpleDateFormat format = new SimpleDateFormat("HH:mm");
                                     Cursor friendCursor = database.rawQuery("select * from friends where uid=? and friendid=?", new String[]{message.getMToId() + "", message.getMFromId() + ""});
@@ -489,7 +494,7 @@ public class MessageService extends Service {
                                     fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
                                     new FileThread(MessageService.this, fileBundle, handler).start();
                                 }
-                                RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+                                RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(getResources(), photo);
                                 roundedBitmapDrawable.setCircular(true);
                                 Intent resultIntent = new Intent(MessageService.this, MainActivity.class);
                                 PendingIntent resultPendingIntent = PendingIntent.getActivity(MessageService.this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -520,16 +525,20 @@ public class MessageService extends Service {
 
                 //userInfo start
                 case TYPE.FRIENDS_RESP:
-                    Log.e(TAG, "friends~~");
+                    Log.i(TAG, "friends~~");
                     if (body[0] == RESP_CODE.SUCCESS) {
                             byte[] userbody = new byte[body.length - 1];
                             System.arraycopy(body, 1, userbody, 0, userbody.length);
                             try {
                                 TTUser getUser = TTUser.parseFrom(userbody);
-                                try {
-                                    database.execSQL("insert into friends values(?,?,?)", new String[]{sessionContext.getuID() + "", getUser.getUId() + "", getUser.getUName()});
-                                } catch (SQLiteConstraintException sc) {
-                                    database.execSQL("update friends set uname=? where uid=? and friendid=?", new String[]{getUser.getUName(), sessionContext.getuID() + "", getUser.getUId() + ""});
+                                ContentValues friendContentValues=new ContentValues();
+                                friendContentValues.put("uid",sessionContext.getuID());
+                                friendContentValues.put("friendid",getUser.getUId());
+                                friendContentValues.put("Uname",getUser.getUName());
+                                long insertcount=database.insert("friends",null,friendContentValues);
+                                if(insertcount<0){
+                                    friendContentValues.put("Uname",getUser.getUName());
+                                    database.update("friends",friendContentValues,"uid=? and friendid=?",new String[]{sessionContext.getuID() + "", getUser.getUId() + ""});
                                 }
                                 //update mainActivity UI
                                 if (mainActivity != null) {
@@ -568,7 +577,7 @@ public class MessageService extends Service {
                                             fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
                                             new FileThread(MessageService.this, fileBundle, handler).start();
                                         }
-                                        RoundedBitmapDrawable friendDrawable=RoundedBitmapDrawableFactory.create(null,photo);
+                                        RoundedBitmapDrawable friendDrawable=RoundedBitmapDrawableFactory.create(getResources(),photo);
                                         friendDrawable.setCircular(true);
                                         friendRecyclerViewItemList.add(new FriendRecyclerViewItem(getUser.getUId(),friendDrawable,null,getUser.getUName()));
                                         friendRecyclerViewItemAdapter.notifyDataSetChanged();
@@ -611,10 +620,10 @@ public class MessageService extends Service {
                     }
                     Bitmap photo = BitmapFactory.decodeFile(getFilesDir().getAbsolutePath() + "/head_portrait/" + uid + ".png");
                     if (photo == null) {
-                        Log.e("MessageService", "File is not exist");
+                        Log.d("MessageService", "File is not exist");
                         return;
                     }
-                    RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+                    RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(getResources(), photo);
                     roundedBitmapDrawable.setCircular(true);
                     //update MainActivity's photo
                     if (mainActivity != null) {
@@ -657,7 +666,7 @@ public class MessageService extends Service {
                             }
                         }
                         //update favorite UI
-                        RoundedBitmapDrawable favoriteroundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+                        RoundedBitmapDrawable favoriteroundedBitmapDrawable = RoundedBitmapDrawableFactory.create(getResources(), photo);
                         favoriteroundedBitmapDrawable.setCircular(true);
                         FavoriteRecyclerViewItemAdapter favoriteRecyclerViewItemAdapter = mainActivity.getFavoriteRecyclerViewItemAdapter();
                         List<FavoriteRecyclerViewItem> favoriteRecyclerViewItemList = mainActivity.getFavoriteRecyclerViewData();
@@ -684,13 +693,23 @@ public class MessageService extends Service {
                     }
                     break;
                 case TYPE.FAVORITE_RESP:
-                    Log.e(TAG, "favorite...");
+                    Log.i(TAG, "favorite...");
                     if (body[0] == RESP_CODE.SUCCESS) {
                         byte[] favoritebody = new byte[body.length - 1];
                         System.arraycopy(body, 1, favoritebody, 0, favoritebody.length);
                         try {
                             TTMessage message = TTMessage.parseFrom(favoritebody);
-                            database.execSQL("insert into favorite values(?,?,?,?,?)", new Object[]{sessionContext.getuID(), message.getMContent(), message.getMTime(), message.getMFromId(), message.getMToId()});
+                            ContentValues favoriteContentValues=new ContentValues();
+                            favoriteContentValues.put("saveuserid",sessionContext.getuID());
+                            favoriteContentValues.put("mcontent",message.getMContent());
+                            favoriteContentValues.put("mtime",message.getMTime());
+                            favoriteContentValues.put("fromid",message.getMFromId());
+                            favoriteContentValues.put("toid",message.getMToId());
+                            long savecount=database.insert("favorite",null,favoriteContentValues);
+                            if(savecount<0){
+                                break;
+                            }
+                            //database.execSQL("insert into favorite values(?,?,?,?,?)", new Object[]{sessionContext.getuID(), message.getMContent(), message.getMTime(), message.getMFromId(), message.getMToId()});
                             Bitmap favoritephoto = BitmapFactory.decodeFile(getFilesDir() + "/head_portrait/" + message.getMFromId() + ".png");
                             String username = "未知用户";
                             if (message.getMFromId() == currentUserId) {
@@ -708,26 +727,36 @@ public class MessageService extends Service {
                                 fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
                                 new FileThread(MessageService.this, fileBundle, handler).start();
                             }
-                            RoundedBitmapDrawable favoriteroundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, favoritephoto);
+                            RoundedBitmapDrawable favoriteroundedBitmapDrawable = RoundedBitmapDrawableFactory.create(getResources(), favoritephoto);
                             favoriteroundedBitmapDrawable.setCircular(true);
                             if (mainActivity != null) {
                                 mainActivity.getFavoriteRecyclerViewData().add(0, new FavoriteRecyclerViewItem(message.getMFromId(), username, message.getMContent(), message.getMTime(), favoriteroundedBitmapDrawable, message.getMToId()));
                                 mainActivity.getFavoriteRecyclerViewItemAdapter().notifyItemInserted(0);
                             }
                         } catch (Exception e) {
-
+                            Log.e(TAG,e.getMessage());
                         }
                     }
                     break;
                 case TYPE.JOIN_RESP:
-                    Log.e(TAG, "join...");
+                    Log.i(TAG, "join...");
                     if(body[0]==RESP_CODE.SUCCESS){
                         if(body[1]==OprateOptions.ASK){
                             byte[] messagebody = new byte[body.length - 2];
                             System.arraycopy(body, 2, messagebody, 0, messagebody.length);
                             try {
                                 TTMessage joinMessage=TTMessage.parseFrom(messagebody);
-                                database.execSQL("insert into requests(rcontent,rtime,fromid,toid,rtype) values(?,?,?,?,?)",new Object[]{joinMessage.getMContent(),joinMessage.getMTime(),joinMessage.getMFromId(),joinMessage.getMToId(),0});
+                                ContentValues requestContentValues=new ContentValues();
+                                requestContentValues.put("rcontent",joinMessage.getMContent());
+                                requestContentValues.put("rtime",joinMessage.getMTime());
+                                requestContentValues.put("fromid",joinMessage.getMFromId());
+                                requestContentValues.put("toid",joinMessage.getMToId());
+                                requestContentValues.put("rtype",0);
+                                long insertcount=database.insert("requests",null,requestContentValues);
+                                if(insertcount<0){
+                                    return;
+                                }
+                                //database.execSQL("insert into requests(rcontent,rtime,fromid,toid,rtype) values(?,?,?,?,?)",new Object[]{joinMessage.getMContent(),joinMessage.getMTime(),joinMessage.getMFromId(),joinMessage.getMToId(),0});
                                 SharedPreferences messageSharedPreferences = getSharedPreferences("message", MODE_PRIVATE);
                                 SharedPreferences.Editor editor = messageSharedPreferences.edit();
                                 editor.putInt("newfriend" + currentUserId,1);

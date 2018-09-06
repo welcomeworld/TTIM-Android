@@ -523,7 +523,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                             Message msg = Message.obtain();
                             msg.what = STOP_MESSAGE_REFRESH;
                             handler.sendMessage(msg);
-                            Log.e(TAG, "NOT MESSAGE REFRESH");
+                            Log.d(TAG, "NOT MESSAGE REFRESH");
                         }
                     }
                 }).start();
@@ -576,9 +576,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                                 if(MessageService.getInstance()!=null){
                                     new FileThread(MainActivity.this, fileBundle, MessageService.getInstance().getHandler()).start();
                                 }
-                                Log.e("MainActivity", "do not have file" + uId + ".png");
+                                Log.d("MainActivity", "do not have file" + uId + ".png");
                             }
-                            RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+                            RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(getResources(), photo);
                             roundedBitmapDrawable.setCircular(true);
                             SimpleDateFormat format = new SimpleDateFormat("HH:mm");
                             conversationList.add(0, new ConversationListItem(uId, cursor.getString(cursor.getColumnIndex("Uname")), "", format.format(new Date(System.currentTimeMillis())), 0 + "", roundedBitmapDrawable));
@@ -638,7 +638,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                                 Message msg = Message.obtain();
                                 msg.what = STOP_FRIEND_REFRESH;
                                 handler.sendMessage(msg);
-                                Log.e(TAG, "NOT Friend REFRESH");
+                                Log.d(TAG, "NOT Friend REFRESH");
                             }
                         }
                     }).start();
@@ -672,7 +672,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     TtApplication.send(favoritePacket);
                     //delete from local
                     try {
-                        database.execSQL("delete from favorite where saveuserid=? and mtime=? and fromid=? and toid=?;", new Object[]{currentUserId, favoritemessage.getMTime(), favoritemessage.getMFromId(), favoritemessage.getMToId()});
+                        database.delete("favorite","saveuserid=? and mtime=? and fromid=? and toid=?",new String[]{currentUserId+"", favoritemessage.getMTime()+"", favoritemessage.getMFromId()+"", favoritemessage.getMToId()+""});
+                        //database.execSQL("delete from favorite where saveuserid=? and mtime=? and fromid=? and toid=?;", new Object[]{currentUserId, favoritemessage.getMTime(), favoritemessage.getMFromId(), favoritemessage.getMToId()});
                         favoriteRecyclerViewData.remove(currentView);
                         favoriteRecyclerViewItemAdapter.notifyDataSetChanged();
                     } catch (Exception e) {
@@ -712,7 +713,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                             Message msg = Message.obtain();
                             msg.what = STOP_FAVORITE_REFRESH;
                             handler.sendMessage(msg);
-                            Log.e(TAG, "NOT Favorite REFRESH");
+                            Log.d(TAG, "NOT Favorite REFRESH");
                         }
                     }
                 }).start();
@@ -810,13 +811,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     public void dataInit() {
-        Log.e("MainActivity", "dataInit");
+        Log.i("MainActivity", "dataInit");
         SharedPreferences currentUserPreferences = getSharedPreferences("data", MODE_PRIVATE);
         int currentUserId = currentUserPreferences.getInt("currentUserId", -1);
         SharedPreferences messagePreferences = getSharedPreferences("message", MODE_PRIVATE);
         Cursor cursor = database.rawQuery("select * from friends where uid=?", new String[]{currentUserId + ""});
         while (cursor.moveToNext()) {
-            Log.e("MainActivity", "have friends");
+            Log.i("MainActivity", "have friends");
             int friendid = cursor.getInt(cursor.getColumnIndex("friendid"));
             int messagecount = messagePreferences.getInt(friendid + ":" + currentUserId, -1);
             String uname = cursor.getString(cursor.getColumnIndex("Uname"));
@@ -829,9 +830,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 if(MessageService.getInstance()!=null){
                     new FileThread(MainActivity.this, fileBundle, MessageService.getInstance().getHandler()).start();
                 }
-                Log.e("MainActivity", "do not have file" + friendid + ".png");
+                Log.d("MainActivity", "do not have file" + friendid + ".png");
             }
-            RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+            RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(getResources(), photo);
             roundedBitmapDrawable.setCircular(true);
             friendRecyclerViewData.add(new FriendRecyclerViewItem(friendid, roundedBitmapDrawable, null, uname));
             Cursor message = database.rawQuery("select * from messages where (Fromid=? and Toid=?) or (Fromid=? and Toid=?) order by Mtime desc limit 1", new String[]{friendid + "", currentUserId + "", currentUserId + "", friendid + ""});
@@ -854,9 +855,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             if(MessageService.getInstance()!=null){
                 new FileThread(MainActivity.this, fileBundle, MessageService.getInstance().getHandler()).start();
             }
-            Log.e("MainActivity", "do not have file" + currentUserId + ".png");
+            Log.d("MainActivity", "do not have file" + currentUserId + ".png");
         }
-        RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+        RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(getResources(), photo);
         roundedBitmapDrawable.setCircular(true);
         ImageButton headerPhotoView = headerView.findViewById(R.id.navigation_photo_header);
         headerPhotoView.setImageDrawable(roundedBitmapDrawable);
@@ -871,9 +872,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 if(MessageService.getInstance()!=null){
                     new FileThread(MainActivity.this, fileBundle, MessageService.getInstance().getHandler()).start();
                 }
-                Log.e("MainActivity", "do not have file" + currentUserId + ".png");
+                Log.d("MainActivity", "do not have file" + currentUserId + ".png");
             }
-            RoundedBitmapDrawable roundedBitmapDrawable2 = RoundedBitmapDrawableFactory.create(null, favoritephoto);
+            RoundedBitmapDrawable roundedBitmapDrawable2 = RoundedBitmapDrawableFactory.create(getResources(), favoritephoto);
             roundedBitmapDrawable2.setCircular(true);
             String uname = "未知";
             if (favorites.getInt(favorites.getColumnIndex("fromid")) == currentUserId) {

@@ -32,6 +32,7 @@ import cn.dmandp.tt.MainActivity;
 import cn.dmandp.utils.HashUtil;
 
 public class FileThread extends Thread {
+    String TAG="FileThread";
     int uid;
     Context context;
     Handler handler;
@@ -51,10 +52,10 @@ public class FileThread extends Thread {
             socket.connect(new InetSocketAddress(Const.HOST, Const.FILEPORT));
             InputStream is = socket.getInputStream();
             OutputStream os = socket.getOutputStream();
-            Log.e("FileThread", "start to get File");
+            Log.i(TAG, "start to get File");
             os.write(type);
             os.write(uid);
-            Log.e("FileThread", "send success");
+            Log.i(TAG, "send success");
             File dir = new File(context.getFilesDir(), "head_portrait");
             if (!dir.exists()) {
                 dir.mkdir();
@@ -68,16 +69,16 @@ public class FileThread extends Thread {
                     existsFlag = false;
                 }
                 String hash = HashUtil.getHash(new FileInputStream(photo), "MD5");
-                Log.e("FileThread", uid + "hash:" + hash);
+                Log.i(TAG, uid + "hash:" + hash);
                 os.write(hash.getBytes());
                 if (is.read() != RESP_CODE.SUCCESS) {
                     if (!existsFlag) {
                         photo.delete();
                     }
-                    Log.e("FileThread", "get photo fail");
+                    Log.d(TAG, "get photo fail");
                     return;
                 }
-                Log.e("FileThread", "File created");
+                Log.i(TAG, "File created");
                 FileOutputStream fos = new FileOutputStream(photo);
                 byte[] fileBytes = new byte[1024];
                 int length = 0;
@@ -86,7 +87,7 @@ public class FileThread extends Thread {
                     count = count + length;
                     fos.write(fileBytes, 0, length);
                     fos.flush();
-                    Log.e("FileThread", "File writed" + count + "byte");
+                    Log.i(TAG, "File writed" + count + "byte");
                 }
                 if (count <= 0) {
                     photo.delete();
@@ -101,9 +102,9 @@ public class FileThread extends Thread {
                 fos.close();
             } else if (type == TYPE.USERPHOTO_SET_REQ) {
                 if (!photo.exists()) {
-                    Log.e("FileThread", "file not exists");
+                    Log.i(TAG, "file not exists");
                 }
-                Log.e("FileThread", "File created");
+                Log.i(TAG, "File created");
                 FileInputStream fis = new FileInputStream(photo);
                 byte[] fileBytes = new byte[1024];
                 int length = 0;
@@ -112,10 +113,10 @@ public class FileThread extends Thread {
                     count = count + length;
                     os.write(fileBytes, 0, length);
                     os.flush();
-                    Log.e("FileThread", "File writed" + count + "byte");
+                    Log.i(TAG, "File writed" + count + "byte");
                 }
                 if (count <= 0) {
-                    Log.e("FileThread", "send file fail");
+                    Log.d(TAG, "send file fail");
                 } else {
                     Message msg = Message.obtain();
                     Bundle bundle = new Bundle();
@@ -129,7 +130,7 @@ public class FileThread extends Thread {
             os.close();
             is.close();
         } catch (IOException e) {
-            Log.e("FileThread", e.getMessage());
+            Log.e(TAG, e.getMessage());
         }
     }
 }

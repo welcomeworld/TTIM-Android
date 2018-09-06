@@ -83,12 +83,12 @@ public class TtApplication extends Application {
                                     socketChannel.write(heart);
                                 }
                                 if (heartfalg) {
-                                    Log.e("TTIM-TtApplication", "heart have start");
+                                    Log.d("TTIM-TtApplication", "heart have start");
                                 }
                                 heartfalg = false;
                             } catch (Exception e) {
                                 if (!heartfalg) {
-                                    Log.e("TTIM-TtApplication", "heart have stop");
+                                    Log.d("TTIM-TtApplication", "heart have stop");
                                     heartfalg = true;
                                 }
                             }
@@ -113,7 +113,7 @@ public class TtApplication extends Application {
                         while (flag) {
                             try {
                                 socketChannel = SocketChannel.open(new InetSocketAddress(Const.HOST, Const.PORT));
-                                Log.e("TTIM-TtApplication", "reconnect" + socketChannel.hashCode());
+                                Log.d("TTIM-TtApplication", "reconnect" + socketChannel.hashCode());
                                 sessionContext.setSocketChannel(socketChannel);
                                 //if have been login,login directly after reconnect
                                 if (sessionContext.isLogin()) {
@@ -147,7 +147,7 @@ public class TtApplication extends Application {
 
     static public void send(TTIMPacket packet) {
         if (sessionContext.getSocketChannel() != null) {
-            Log.e(TAG, sessionContext.getSocketChannel().hashCode() + "send Packet" + packet.getTYPE());
+            Log.i(TAG, sessionContext.getSocketChannel().hashCode() + "send Packet" + packet.getTYPE());
         }
         new SendThread(packet).start();
     }

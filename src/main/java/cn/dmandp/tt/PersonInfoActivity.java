@@ -71,14 +71,14 @@ public class PersonInfoActivity extends BaseActivity {
         personInfo_photo_button = findViewById(R.id.personinfo_photo);
         Bitmap photo = BitmapFactory.decodeFile(getFilesDir().getAbsolutePath() + "/head_portrait/" + personInfoUserId + ".png");
         if (photo == null) {
-            Log.e("MessageService", "File is not exist");
+            Log.d("MessageService", "File is not exist");
             photo = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
             Bundle fileBundle = new Bundle();
             fileBundle.putInt("uid",personInfoUserId);
             fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
             new FileThread(PersonInfoActivity.this, fileBundle, MessageService.getInstance().getHandler()).start();
         }
-        RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+        RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(getResources(), photo);
         roundedBitmapDrawable.setCircular(true);
         personInfo_photo_button.setImageDrawable(roundedBitmapDrawable);
         if(personInfoUserId==currentUserId){
@@ -112,7 +112,7 @@ public class PersonInfoActivity extends BaseActivity {
             ImageUtil.sizeCompressImage(photo, getFilesDir().getAbsolutePath() + "/head_portrait/" + personInfoUserId + ".png");
             photo = ImageUtil.samplingRateCompressImage(getFilesDir().getAbsolutePath() + "/head_portrait/" + personInfoUserId + ".png", getFilesDir().getAbsolutePath() + "/head_portrait/" + personInfoUserId + ".png");
             photo = ImageUtil.qualityCompressImage(photo, getFilesDir().getAbsolutePath() + "/head_portrait/" + personInfoUserId + ".png");
-            RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+            RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(getResources(), photo);
             roundedBitmapDrawable.setCircular(true);
             personInfo_photo_button.setImageDrawable(roundedBitmapDrawable);
             Bundle fileBundle = new Bundle();

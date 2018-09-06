@@ -5,6 +5,7 @@
 package cn.dmandp.adapter;
 
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -104,7 +105,10 @@ public class NewFriendRecyclerViewItemAdapter extends RecyclerView.Adapter {
                             viewHolder.spinner.setVisibility(View.GONE);
                             viewHolder.statusText.setVisibility(View.VISIBLE);
                             viewHolder.statusText.setText("已同意");
-                            database.execSQL("update requests set rstatus=? where fromid=? and toid=? and rtime=?",new Object[]{1,item.getUId(),TtApplication.getSessionContext().getuID(),item.getTime()});
+                            ContentValues agreeContentValues=new ContentValues();
+                            agreeContentValues.put("rstatus",1);
+                            database.update("requests",agreeContentValues,"fromid=? and toid=? and rtime=?",new String[]{item.getUId()+"",TtApplication.getSessionContext().getuID()+"",item.getTime()+""});
+                            //database.execSQL("update requests set rstatus=? where fromid=? and toid=? and rtime=?",new Object[]{1,item.getUId(),TtApplication.getSessionContext().getuID(),item.getTime()});
                             break;
                         case 1:
                             changeBuffer.put(OprateOptions.ANSWER);
@@ -118,7 +122,10 @@ public class NewFriendRecyclerViewItemAdapter extends RecyclerView.Adapter {
                             viewHolder.spinner.setVisibility(View.GONE);
                             viewHolder.statusText.setVisibility(View.VISIBLE);
                             viewHolder.statusText.setText("已拒绝");
-                            database.execSQL("update requests set rstatus=? where fromid=? and toid=? and rtime=?",new Object[]{2,item.getUId(),TtApplication.getSessionContext().getuID(),item.getTime()});
+                            ContentValues rejectContentValues=new ContentValues();
+                            rejectContentValues.put("rstatus",2);
+                            database.update("requests",rejectContentValues,"fromid=? and toid=? and rtime=?",new String[]{item.getUId()+"",TtApplication.getSessionContext().getuID()+"",item.getTime()+""});
+                            //database.execSQL("update requests set rstatus=? where fromid=? and toid=? and rtime=?",new Object[]{2,item.getUId(),TtApplication.getSessionContext().getuID(),item.getTime()});
                             break;
                     }
                 }

@@ -1,5 +1,6 @@
 package cn.dmandp.tt;
 
+import android.content.ContentValues;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -117,10 +118,10 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
             allMessages.put(chatUserId, messages);
         }
 
-        send = (Button) findViewById(R.id.conversation_send);
-        messagetext = (EditText) findViewById(R.id.conversation_messagetext);
+        send =  findViewById(R.id.conversation_send);
+        messagetext =  findViewById(R.id.conversation_messagetext);
         send.setOnClickListener(this);
-        ListView messagelistview = (ListView) findViewById(R.id.conversation_listview);
+        ListView messagelistview = findViewById(R.id.conversation_listview);
         datainit();
         adapter = new MessageAdapter(ConversationActivity.this, R.layout.listview_message, messages);
         adapter.setOnItemClickListener(new MessageAdapter.OnItemClickListener() {
@@ -146,16 +147,22 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
                 favoritePacket.setBody(body);
                 TtApplication.send(favoritePacket);
                 //save favorite to local database
-                try {
-                    database.execSQL("insert into favorite values(?,?,?,?,?);", new Object[]{currentUserId, favoritemessage.getMContent(), favoritemessage.getMTime(), favoritemessage.getMFromId(), favoritemessage.getMToId()});
-                    Toast.makeText(ConversationActivity.this, "have save to favorite", Toast.LENGTH_SHORT).show();
-                    MainActivity mainActivity = (MainActivity) SessionContext.activities.get("MainActivity");
-                    if (mainActivity != null) {
-                        mainActivity.getFavoriteRecyclerViewData().add(0, new FavoriteRecyclerViewItem(favoritemessage.getMFromId(), message.getName(), message.getMessage(), message.getTime(), message.getTouxiang(), favoritemessage.getMToId()));
-                        mainActivity.getFavoriteRecyclerViewItemAdapter().notifyItemInserted(0);
-                    }
-                } catch (Exception e) {
-
+                ContentValues favoriteContentValues=new ContentValues();
+                favoriteContentValues.put("saveuserid",currentUserId);
+                favoriteContentValues.put("mcontent",favoritemessage.getMContent());
+                favoriteContentValues.put("mtime",favoritemessage.getMTime());
+                favoriteContentValues.put("fromid",favoritemessage.getMFromId());
+                favoriteContentValues.put("toid",favoritemessage.getMToId());
+                long insertcount=database.insert("favorite",null,favoriteContentValues);
+                if(insertcount<0){
+                    return;
+                }
+                //database.execSQL("insert into favorite values(?,?,?,?,?);", new Object[]{currentUserId, favoritemessage.getMContent(), favoritemessage.getMTime(), favoritemessage.getMFromId(), favoritemessage.getMToId()});
+                Toast.makeText(ConversationActivity.this, "have save to favorite", Toast.LENGTH_SHORT).show();
+                MainActivity mainActivity = (MainActivity) SessionContext.activities.get("MainActivity");
+                if (mainActivity != null) {
+                    mainActivity.getFavoriteRecyclerViewData().add(0, new FavoriteRecyclerViewItem(favoritemessage.getMFromId(), message.getName(), message.getMessage(), message.getTime(), message.getTouxiang(), favoritemessage.getMToId()));
+                    mainActivity.getFavoriteRecyclerViewItemAdapter().notifyItemInserted(0);
                 }
             }
         });
@@ -196,7 +203,7 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
                     fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
                     new FileThread(ConversationActivity.this, fileBundle, MessageService.getInstance().getHandler()).start();
                 }
-                RoundedBitmapDrawable userRoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, userPhoto);
+                RoundedBitmapDrawable userRoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(getResources(), userPhoto);
                 userRoundedBitmapDrawable.setCircular(true);
                 ChatMessage newMessage = new ChatMessage(userRoundedBitmapDrawable, currentUserName, messagetext.getText() + "", message.getMTime(), 0,message.getMFromId());
                 messagetext.setText("");
@@ -215,10 +222,13 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
                         }
                     }
                 }
-                try {
-                    database.execSQL("insert into messages values(?,?,?,?)", new Object[]{message.getMContent(), message.getMTime(), message.getMFromId(), message.getMToId()});
-                } catch (Exception e) {
-                }
+                ContentValues messageContentValues=new ContentValues();
+                messageContentValues.put("mcontent",message.getMContent());
+                messageContentValues.put("Mtime",message.getMTime());
+                messageContentValues.put("Fromid",message.getMFromId());
+                messageContentValues.put("Toid",message.getMToId());
+                database.insert("messages",null,messageContentValues);
+                //database.execSQL("insert into messages values(?,?,?,?)", new Object[]{message.getMContent(), message.getMTime(), message.getMFromId(), message.getMToId()});
             default:
                 break;
         }
@@ -236,7 +246,7 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
                 fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
                 new FileThread(ConversationActivity.this, fileBundle, MessageService.getInstance().getHandler()).start();
             }
-            RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, photo);
+            RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(getResources(), photo);
             roundedBitmapDrawable.setCircular(true);
             if (userPhoto == null) {
                 userPhoto = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
@@ -245,7 +255,7 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
                 fileBundle.putByte("type", TYPE.USERPHOTO_GET_REQ);
                 new FileThread(ConversationActivity.this, fileBundle, MessageService.getInstance().getHandler()).start();
             }
-            RoundedBitmapDrawable userRoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, userPhoto);
+            RoundedBitmapDrawable userRoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(getResources(), userPhoto);
             userRoundedBitmapDrawable.setCircular(true);
             SimpleDateFormat format = new SimpleDateFormat("HH:mm");
             String mcontent = message.getString(message.getColumnIndex("mcontent"));

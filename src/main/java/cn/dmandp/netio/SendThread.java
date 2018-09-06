@@ -20,6 +20,7 @@ import cn.dmandp.tt.MainActivity;
  */
 
 public class SendThread extends Thread {
+    String TAG="SendThread";
     private TTIMPacket packet;
 
     public SendThread(TTIMPacket packet) {
@@ -52,11 +53,10 @@ public class SendThread extends Thread {
                     socketChannel.write(byteBuffer);
                 }
                 byteBuffer.compact();
-                Log.e("SendThread", packet.getTYPE() + "send success");
+                Log.i(TAG, packet.getTYPE() + "send success");
             }
         } catch (Exception e) {
-            Log.e("SendThread", packet.getTYPE() + "send fail because:"+e.getMessage());
-            e.printStackTrace();
+            Log.e(TAG, packet.getTYPE() + "send fail because:"+e.getMessage());
         }
     }
 }
