@@ -10,7 +10,6 @@ import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -18,15 +17,8 @@ import java.io.FileOutputStream;
 
 public class ImageUtil {
 
-    /**
-     * scale bitmap by  samplingRate from bitmap
-     *
-     * @param srcPath
-     * @param desPath
-     * @return
-     */
     public static Bitmap samplingRateCompressImage(String srcPath, String desPath) {
-        FileOutputStream fos = null;
+        FileOutputStream fos;
         BitmapFactory.Options op = new BitmapFactory.Options();
         op.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(srcPath, op);
@@ -64,8 +56,8 @@ public class ImageUtil {
      * compress image by change size
      * redraw bitmap
      */
-    public static Bitmap sizeCompressImage(Bitmap bitmap, String desPath) {
-        FileOutputStream fos = null;
+    public static void sizeCompressImage(Bitmap bitmap, String desPath) {
+        FileOutputStream fos;
         if (bitmap.getHeight() > 640 || bitmap.getWidth() > 640) {
             Bitmap result = Bitmap.createBitmap(640, 640, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(result);
@@ -76,14 +68,10 @@ public class ImageUtil {
         try {
             if (desPath != null) {
                 fos = new FileOutputStream(desPath);
-                if (bitmap != null) {
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                }
             }
-            return bitmap;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            return null;
         }
     }
 

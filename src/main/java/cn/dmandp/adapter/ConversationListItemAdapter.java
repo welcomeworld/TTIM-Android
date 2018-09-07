@@ -1,15 +1,14 @@
 package cn.dmandp.adapter;
 
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import cn.dmandp.entity.ConversationListItem;
 import cn.dmandp.tt.R;
 
@@ -19,7 +18,7 @@ import cn.dmandp.tt.R;
  */
 
 public class ConversationListItemAdapter extends RecyclerView.Adapter<ConversationListItemAdapter.ViewHolder> {
-    ArrayList<ConversationListItem> recycleViewData;
+    private ArrayList<ConversationListItem> recycleViewData;
     private OnItemClickListener onItemClickListener;
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
@@ -30,14 +29,15 @@ public class ConversationListItemAdapter extends RecyclerView.Adapter<Conversati
         recycleViewData = (ArrayList<ConversationListItem>) data;
     }
 
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.listview_conversation, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         final ConversationListItem currentView = recycleViewData.get(position);
         holder.imageView.setImageDrawable(currentView.getImage());
         holder.userTextView.setText(currentView.getUsername());
@@ -71,7 +71,7 @@ public class ConversationListItemAdapter extends RecyclerView.Adapter<Conversati
         TextView timeTextView;
         TextView newMessageTextView;
 
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.conversationlistitem_image);
             userTextView = itemView.findViewById(R.id.conversationlistitem_user);
@@ -82,6 +82,6 @@ public class ConversationListItemAdapter extends RecyclerView.Adapter<Conversati
     }
 
     public interface OnItemClickListener {
-        public void onItemClick(View view, int uId);
+        void onItemClick(View view, int uId);
     }
 }

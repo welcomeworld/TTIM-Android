@@ -2,10 +2,12 @@
   ~ Copyright (c) 2018. welcomeworld All rights reserved
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp">
+    android:padding="8dp"
+    android:baselineAligned="false">
 
     <LinearLayout
         android:layout_width="0dp"
@@ -44,6 +46,7 @@
             android:layout_height="24dp"
             android:layout_gravity="center"
             android:background="@drawable/circle_24dp"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            android:contentDescription="@string/image_description"/>
     </LinearLayout>
 </LinearLayout>

@@ -55,7 +55,7 @@
                 android:id="@+id/recyclerview_newfriend_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="暂定未知昵称"/>
+                android:text="@string/username_hint"/>
             <TextView
                 android:id="@+id/recyclerview_newfriend_content"
                 android:layout_width="wrap_content"

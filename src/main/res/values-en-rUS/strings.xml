@@ -48,10 +48,11 @@
     <string name="notification_on">open notification</string>
     <string name="notification_on_summary">notification access now</string>
     <string name="notification_off_summary">notification have closed</string>
-    <string name="cancel">cancel</string>
-    <string name="confirm">confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
     <string name="notification_ring">notification ring</string>
     <string name="have_use">have use:\n</string>
     <string name="up_flow">upstream traffic \n</string>
     <string name="down_flow">downstream traffic </string>
+    <string name="refresh">pull down refresh</string>
 </resources>

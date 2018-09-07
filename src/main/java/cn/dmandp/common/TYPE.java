@@ -4,86 +4,87 @@ public interface TYPE {
     /**
      * 登录请求
      */
-    static final byte LOGIN_REQ = 0;
+    byte LOGIN_REQ = 0;
     /**
      * 登录响应
      */
-    static final byte LOGIN_RESP = 1;
+     byte LOGIN_RESP = 1;
     /**
      * 发送请求
      */
-    static final byte SEND_REQ = 2;
+     byte SEND_REQ = 2;
     /**
      * 发送响应
      */
-    static final byte SEND_RESP = 3;
+     byte SEND_RESP = 3;
     /**
      * 接收请求
      */
-    static final byte RECEIVE_REQ = 4;
+     byte RECEIVE_REQ = 4;
     /**
      * 接收响应
      */
-    static final byte RECEIVE_RESP = 5;
+     byte RECEIVE_RESP = 5;
     /**
      * 注册请求
      */
-    static final byte REGISTER_REQ = 6;
+     byte REGISTER_REQ = 6;
     /**
      * 注册响应
      */
-    static final byte REGISTER_RESP = 7;
+     byte REGISTER_RESP = 7;
     /**
      * 加入请求
      */
-    static final byte JOIN_REQ = 8;
+     byte JOIN_REQ = 8;
     /**
      * 加入响应
      */
-    static final byte JOIN_RESP = 9;
+    byte JOIN_RESP = 9;
     /**
      * 好友信息请求
      */
-    static final byte FRIENDS_REQ = 10;
+    byte FRIENDS_REQ = 10;
     /**
      * 好友信息响应
      */
-    static final byte FRIENDS_RESP = 11;
+     byte FRIENDS_RESP = 11;
     /**
      * 心跳
      */
-    static final byte HEART = 12;
+     byte HEART = 12;
     /**
      * user info update req
      */
-    static final byte USERINFO_REQ = 13;
+    @SuppressWarnings("unused")
+    byte USERINFO_REQ = 13;
     /**
      * user info update resp
      */
-    static final byte USERINFO_RESP = 14;
+     byte USERINFO_RESP = 14;
     /**
      * user photo get req
      */
-    static final byte USERPHOTO_GET_REQ = 15;
+     byte USERPHOTO_GET_REQ = 15;
     /**
      * user photo get resp
      */
-    static final byte USERPHOTO_GET_RESP = 16;
+     byte USERPHOTO_GET_RESP = 16;
     /**
      * user photo set req
      */
-    static final byte USERPHOTO_SET_REQ = 17;
+     byte USERPHOTO_SET_REQ = 17;
     /**
      * user photo set resp
      */
-    static final byte USERPHOTO_SET_RESP = 18;
+     byte USERPHOTO_SET_RESP = 18;
     /**
      * favorite req
      */
-    static final byte FAVORITE_REQ = 19;
+     byte FAVORITE_REQ = 19;
     /**
      * favorite resp
      */
-    static final byte FAVORITE_RESP = 20;
+     byte FAVORITE_RESP = 20;
 }
 

@@ -11,13 +11,16 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class TTIMDaoHelper extends SQLiteOpenHelper {
     private final static String DATABASE_NAME = "ttimDatabase";
     private final static Integer DATABASE_VERSION = 2;
+    @SuppressWarnings("FieldCanBeLocal")
     private final String CREATE_FRIENDS = "create table friends (uid int not null,friendid int not null," +
             "Uname varchar(30) not null,Primary key (uid,friendid))";
+    @SuppressWarnings("FieldCanBeLocal")
     private final String CREATE_MESSAGES = "create table messages(mcontent varchar(400) not null," +
             "Mtime bigint not null," +
             "Fromid int not null," +
             "Toid int not null," +
             "Primary key (fromid,toid,mtime))";
+    @SuppressWarnings("FieldCanBeLocal")
     private final String CREATE_FAVORITE = "CREATE TABLE `favorite` (saveuserid int(11) NOT NULL ,  " +
             "`mcontent` varchar(400) NOT NULL,   " +
             "`mtime` bigint(20) NOT NULL,   " +
@@ -33,16 +36,14 @@ public class TTIMDaoHelper extends SQLiteOpenHelper {
             "  `rstatus` int(2) DEFAULT 0,"+
             "PRIMARY KEY (`fromid`,`toid`,`rtime`));";
 
-    private Context mContext;
 
+    @SuppressWarnings("unused")
     public TTIMDaoHelper(Context mContext, SQLiteDatabase.CursorFactory factory) {
         super(mContext, DATABASE_NAME, factory, DATABASE_VERSION);
-        this.mContext = mContext;
     }
 
     public TTIMDaoHelper(Context mContext) {
         super(mContext, DATABASE_NAME, null, DATABASE_VERSION);
-        this.mContext = mContext;
     }
 
     @Override

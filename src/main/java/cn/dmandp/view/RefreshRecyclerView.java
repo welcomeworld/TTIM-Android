@@ -6,6 +6,7 @@ package cn.dmandp.view;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
@@ -27,6 +28,7 @@ public class RefreshRecyclerView extends RecyclerView {
     // 手指按下的Y位置
     private int mFingerDownY;
     // 手指拖拽的阻力指数
+    @SuppressWarnings("FieldCanBeLocal")
     private float mDragIndex = 0.35f;
     // 当前是否正在拖动
     private boolean mCurrentDrag = false;
@@ -129,6 +131,7 @@ public class RefreshRecyclerView extends RecyclerView {
     }
 
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent e) {
         switch (e.getAction()) {

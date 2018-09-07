@@ -1,6 +1,5 @@
 package cn.dmandp.entity;
 
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 
 /**

@@ -15,33 +15,38 @@
         android:layout_height="wrap_content"
         android:src="@drawable/circle_64dp"
         android:background="@color/transparent"
-        android:layout_marginBottom="8dp"/>
+        android:layout_marginBottom="8dp"
+        android:contentDescription="@string/image_description"/>
     <ImageButton
         android:id="@+id/theme_dialog_pink"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/circle_64dp"
         android:background="@color/transparent"
-        android:layout_marginBottom="8dp"/>
+        android:layout_marginBottom="8dp"
+        android:contentDescription="@string/image_description"/>
     <ImageButton
         android:id="@+id/theme_dialog_purple"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/circle_64dp"
         android:background="@color/transparent"
-        android:layout_marginBottom="8dp"/>
+        android:layout_marginBottom="8dp"
+        android:contentDescription="@string/image_description"/>
     <ImageButton
         android:id="@+id/theme_dialog_violet"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/circle_64dp"
         android:background="@color/transparent"
-        android:layout_marginBottom="8dp"/>
+        android:layout_marginBottom="8dp"
+        android:contentDescription="@string/image_description"/>
     <ImageButton
         android:id="@+id/theme_dialog_yellow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/circle_64dp"
         android:background="@color/transparent"
-        android:layout_marginBottom="8dp"/>
+        android:layout_marginBottom="8dp"
+        android:contentDescription="@string/image_description"/>
 </LinearLayout>

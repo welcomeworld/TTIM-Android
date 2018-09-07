@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.security.MessageDigest;
 
 public class HashUtil {
+    @SuppressWarnings("unused")
     public static String getHash(String source, String type) {
         StringBuilder sb = new StringBuilder();
         MessageDigest md;
@@ -32,7 +33,7 @@ public class HashUtil {
         try {
             md = MessageDigest.getInstance(type);
             byte[] buffer = new byte[1024];
-            int length = -1;
+            int length;
             while ((length = inputStream.read(buffer, 0, 1024)) != -1) {
                 md.update(buffer, 0, length);
             }
@@ -43,7 +44,6 @@ public class HashUtil {
             return sb.toString();
         } catch (Exception e) {
             Log.e("HashUtil", e.getMessage());
-            ;
         }
         return null;
     }

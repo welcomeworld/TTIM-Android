@@ -88,7 +88,7 @@ public class SettingFragment extends PreferenceFragment implements Preference.On
                 clearDialogBuilder.setMessage(R.string.clear_cache_message).setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        getActivity().getSharedPreferences("message", Context.MODE_PRIVATE).edit().clear().commit();
+                        getActivity().getSharedPreferences("message", Context.MODE_PRIVATE).edit().clear().apply();
                         getActivity().deleteDatabase("ttimDatabase");
                         Intent mainIntent=new Intent("cn.dmandp.tt.action.MAINACTIVITY");
                         mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

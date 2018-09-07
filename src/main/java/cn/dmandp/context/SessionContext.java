@@ -14,16 +14,16 @@ import cn.dmandp.entity.TTUser;
  * @date 18 Mar 2018 20:42:06
  */
 public class SessionContext {
-    public static Map<String, Activity> activities = new HashMap<String, Activity>();
+    public static Map<String, Activity> activities = new HashMap<>();
     private TTUser bindUser;
     private Integer uID;
     private Boolean login = false;
     private SocketChannel socketChannel;
     private Map<String, Object> Attributes;
     public String socketChannelErrorMessage;
-    public SessionContext(SocketChannel socketChannel) {
+    SessionContext(SocketChannel socketChannel) {
         this.socketChannel = socketChannel;
-        Attributes = new HashMap<String, Object>();
+        Attributes = new HashMap<>();
     }
 
     public SocketChannel getSocketChannel() {

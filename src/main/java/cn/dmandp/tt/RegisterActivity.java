@@ -1,6 +1,6 @@
 package cn.dmandp.tt;
 
-import android.app.Activity;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -11,11 +11,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-
 import cn.dmandp.common.Const;
 import cn.dmandp.common.RESP_CODE;
 import cn.dmandp.common.TYPE;
@@ -62,6 +60,7 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     class RegisterTask extends AsyncTask<String, String, Result> {
 
         @Override
@@ -80,8 +79,7 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
             builder.setUName(strings[2]);
             builder.setUId(uId);
             TTUser registerUser = builder.build();
-            TtApplication application = (TtApplication) getApplication();
-            SessionContext sessionContext = application.getSessionContext();
+            SessionContext sessionContext = TtApplication.getSessionContext();
             if (sessionContext == null) {
                 Log.i("RegisterActivity", "sessionContext is null");
                 result.setResultStatus((byte) 0);
@@ -128,8 +126,8 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
                 SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
                 editor.putInt("currentUserId", currentUser.getUId());
                 editor.putString("currentUserPassword", currentUser.getUPassword());
-                editor.commit();
-                SessionContext sessionContext = ((TtApplication) getApplication()).getSessionContext();
+                editor.apply();
+                SessionContext sessionContext = TtApplication.getSessionContext();
                 sessionContext.setLogin(true);
                 sessionContext.setuID(currentUser.getUId());
                 sessionContext.setBindUser(currentUser);

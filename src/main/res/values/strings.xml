@@ -27,7 +27,6 @@
     <string name="add_friends">添加好友</string>
     <string name="scan">扫一扫</string>
     <string name="theme">主题</string>
-    <string name="advertisement">广告推广</string>
     <string name="friends">好友</string>
     <string name="new_friends">新的朋友</string>
     <string name="friend_request">好友申请</string>
@@ -54,4 +53,5 @@
     <string name="have_use">已使用：\n</string>
     <string name="up_flow">上行流量 \n</string>
     <string name="down_flow">下行流量 </string>
+    <string name="refresh">下拉刷新</string>
 </resources>

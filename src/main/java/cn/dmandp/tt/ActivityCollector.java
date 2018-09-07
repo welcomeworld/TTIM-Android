@@ -1,7 +1,6 @@
 package cn.dmandp.tt;
 
 import android.app.Activity;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +9,7 @@ import java.util.List;
  */
 
 public class ActivityCollector {
-    public static List<Activity> activities = new ArrayList<Activity>();
+    private static List<Activity> activities = new ArrayList<>();
 
     public static void addActivity(Activity activity) {
         activities.add(activity);

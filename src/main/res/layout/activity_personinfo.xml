@@ -30,7 +30,7 @@
             android:layout_marginTop="64dp"
             android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp"
-            android:textSize="20dp"
+            android:textSize="20sp"
             android:text="@string/username_hint" />
         <TextView
             android:id="@+id/personinfo_userid"
@@ -39,8 +39,7 @@
             android:layout_marginTop="88dp"
             android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp"
-            android:textSize="16dp"
-            android:text="uid:UID"/>
+            android:textSize="16sp" />
     </com.github.florent37.diagonallayout.DiagonalLayout>
 
     <ImageButton

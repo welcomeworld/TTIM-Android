@@ -1,6 +1,6 @@
 package cn.dmandp.context;
-import android.app.Application;
 
+import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -16,8 +15,6 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Locale;
-
-
 import cn.dmandp.common.Const;
 import cn.dmandp.common.TYPE;
 import cn.dmandp.entity.TTIMPacket;
@@ -30,6 +27,7 @@ import cn.dmandp.service.MessageService;
  */
 
 public class TtApplication extends Application {
+    @SuppressWarnings("FieldCanBeLocal")
     private static String TAG = "TTIM-TtApplication";
     static SessionContext sessionContext = new SessionContext(null);
 
@@ -70,6 +68,7 @@ public class TtApplication extends Application {
                     @Override
                     public void run() {
                         boolean heartfalg = true;
+                        //noinspection InfiniteLoopStatement
                         while (true) {
                             SocketChannel socketChannel = sessionContext.getSocketChannel();
                             //send heart
@@ -100,6 +99,7 @@ public class TtApplication extends Application {
                         }
                     }
                 }).start();
+                //noinspection InfiniteLoopStatement
                 while (true) {
                     try {
                         Thread.sleep(50);
@@ -133,6 +133,7 @@ public class TtApplication extends Application {
                                 }
                                 flag = false;
                             } catch (Exception e) {
+                                e.printStackTrace();
                             }
                         }
                     }
@@ -160,9 +161,9 @@ public class TtApplication extends Application {
             notificationChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
             notificationChannel.setShowBadge(true);
             NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            notificationManager.createNotificationChannel(notificationChannel);
+            if(notificationManager!=null){
+                notificationManager.createNotificationChannel(notificationChannel);
+            }
         }
     }
-
-    ;
 }

@@ -23,6 +23,7 @@ public class NewFriendRecyclerViewItem {
         this.status = status;
     }
 
+    @SuppressWarnings("unused")
     public void setUsername(String username) {
         this.username = username;
     }
@@ -35,6 +36,7 @@ public class NewFriendRecyclerViewItem {
         this.time = time;
     }
 
+    @SuppressWarnings("unused")
     public void setStatus(Integer status) {
         this.status = status;
     }
@@ -43,6 +45,7 @@ public class NewFriendRecyclerViewItem {
         this.image = image;
     }
 
+    @SuppressWarnings("unused")
     public String getUsername() {
         return username;
     }

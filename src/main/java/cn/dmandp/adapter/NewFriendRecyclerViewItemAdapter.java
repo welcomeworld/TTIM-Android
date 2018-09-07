@@ -4,43 +4,38 @@
 
 package cn.dmandp.adapter;
 
-import android.app.AlertDialog;
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
 import cn.dmandp.common.OprateOptions;
 import cn.dmandp.common.TYPE;
 import cn.dmandp.context.TtApplication;
 import cn.dmandp.dao.TTIMDaoHelper;
 import cn.dmandp.entity.NewFriendRecyclerViewItem;
 import cn.dmandp.entity.TTIMPacket;
-import cn.dmandp.entity.TTMessage;
 import cn.dmandp.service.MessageService;
 import cn.dmandp.tt.R;
 
 public class NewFriendRecyclerViewItemAdapter extends RecyclerView.Adapter {
-    TTIMDaoHelper daoHelper = new TTIMDaoHelper(MessageService.getInstance());
-    SQLiteDatabase database;
-    ArrayList<NewFriendRecyclerViewItem> data;
+    @SuppressWarnings("FieldCanBeLocal")
+    private TTIMDaoHelper daoHelper = new TTIMDaoHelper(MessageService.getInstance());
+    private SQLiteDatabase database;
+    private ArrayList<NewFriendRecyclerViewItem> data;
     public NewFriendRecyclerViewItemAdapter(List<NewFriendRecyclerViewItem> data){
         this.data= (ArrayList<NewFriendRecyclerViewItem>) data;
         database=daoHelper.getReadableDatabase();
@@ -60,7 +55,7 @@ public class NewFriendRecyclerViewItemAdapter extends RecyclerView.Adapter {
         TextView contentText;
         Spinner spinner;
         TextView statusText;
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
             timeText=itemView.findViewById(R.id.recyclerview_newfriend_time);
             photoView=itemView.findViewById(R.id.recyclerview_newfriend_image);
@@ -71,6 +66,7 @@ public class NewFriendRecyclerViewItemAdapter extends RecyclerView.Adapter {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         final ViewHolder viewHolder= (ViewHolder) holder;

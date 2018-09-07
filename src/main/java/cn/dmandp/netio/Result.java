@@ -9,10 +9,12 @@ public class Result {
     private byte resultStatus;
     private Object resultBody;
 
+    @SuppressWarnings("unused")
     public byte getResultType() {
         return resultType;
     }
 
+    @SuppressWarnings("unused")
     public void setResultType(byte resultType) {
         this.resultType = resultType;
     }

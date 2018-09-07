@@ -8,16 +8,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
 import cn.dmandp.entity.ChatMessage;
 import cn.dmandp.tt.PersonInfoActivity;
 import cn.dmandp.tt.R;
@@ -30,21 +26,22 @@ public class MessageAdapter extends ArrayAdapter<ChatMessage> {
     private int resourceId;
     private OnItemClickListener onItemClickListener;
 
-    public MessageAdapter(@NonNull Context context, int resource, @NonNull List objects) {
+    public MessageAdapter(@NonNull Context context, int resource, @NonNull List<ChatMessage> objects) {
         super(context, resource, objects);
         this.resourceId = resource;
     }
 
     public interface OnItemClickListener {
-        public void onItemClick(View view, ChatMessage message);
+        void onItemClick(View view, ChatMessage message);
     }
 
     public void setOnItemClickListener(MessageAdapter.OnItemClickListener onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
     }
 
+    @NonNull
     @Override
-    public View getView(int position, View convertView, final ViewGroup parent) {
+    public View getView(int position, View convertView, @NonNull final ViewGroup parent) {
         final ChatMessage chatMessage = getItem(position);
         View view;
         ViewHolder viewHolder;
@@ -66,6 +63,9 @@ public class MessageAdapter extends ArrayAdapter<ChatMessage> {
             viewHolder = (ViewHolder) view.getTag();
         }
         SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.CHINA);
+        if(chatMessage==null){
+            return view;
+        }
         if (chatMessage.getType() == 0) {
             viewHolder.leftLayout.setVisibility(View.GONE);
             viewHolder.rightLayout.setVisibility(View.VISIBLE);

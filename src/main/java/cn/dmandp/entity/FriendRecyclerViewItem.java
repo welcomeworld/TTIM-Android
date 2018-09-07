@@ -27,10 +27,12 @@ public class FriendRecyclerViewItem {
         this.primaryImage = primaryImage;
     }
 
+    @SuppressWarnings("unused")
     public Drawable getSubImage() {
         return subImage;
     }
 
+    @SuppressWarnings("unused")
     public void setSubImage(Drawable subImage) {
         this.subImage = subImage;
     }

@@ -4,7 +4,6 @@
 
 package cn.dmandp.adapter;
 
-import android.media.Image;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -13,12 +12,10 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
-
 import cn.dmandp.entity.FavoriteRecyclerViewItem;
 import cn.dmandp.tt.R;
 
@@ -90,6 +87,6 @@ public class FavoriteRecyclerViewItemAdapter extends RecyclerView.Adapter<Favori
     }
 
     public interface OnItemClickListener {
-        public void onItemClick(View view, FavoriteRecyclerViewItem currentView);
+       void onItemClick(View view, FavoriteRecyclerViewItem currentView);
     }
 }

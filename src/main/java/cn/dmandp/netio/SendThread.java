@@ -5,22 +5,19 @@
 package cn.dmandp.netio;
 
 import android.util.Log;
-import android.widget.Toast;
-
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-
 import cn.dmandp.context.SessionContext;
 import cn.dmandp.context.TtApplication;
 import cn.dmandp.entity.TTIMPacket;
-import cn.dmandp.tt.MainActivity;
 
 /**
  * Created by 萌即正义 on 10/06/2018.
  */
 
 public class SendThread extends Thread {
-    String TAG="SendThread";
+    @SuppressWarnings("FieldCanBeLocal")
+    private String TAG="SendThread";
     private TTIMPacket packet;
 
     public SendThread(TTIMPacket packet) {
@@ -38,7 +35,7 @@ public class SendThread extends Thread {
             int length = packet.getBodylength();
             int count = 0;
             while (length != 0) {
-                int writeCount = 0;
+                int writeCount;
                 if (length > byteBuffer.limit()) {
                     writeCount = byteBuffer.limit();
                 } else {

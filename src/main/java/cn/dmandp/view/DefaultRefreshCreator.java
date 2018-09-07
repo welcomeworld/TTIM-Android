@@ -8,10 +8,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.RotateAnimation;
 import android.widget.TextView;
-
 import cn.dmandp.tt.R;
 
 public class DefaultRefreshCreator extends RefreshViewCreator {

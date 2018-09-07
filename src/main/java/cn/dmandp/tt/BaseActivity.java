@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-
 import cn.dmandp.context.SessionContext;
 import cn.dmandp.utils.ThemeUtil;
 
@@ -12,7 +11,7 @@ import cn.dmandp.utils.ThemeUtil;
  * Created by 萌即正义 on 13/04/2018.
  */
 
-public class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends AppCompatActivity {
     String TAG = "BaseActivity";
     private boolean foreground = false;
 

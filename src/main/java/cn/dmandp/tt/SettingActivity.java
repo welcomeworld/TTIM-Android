@@ -12,7 +12,9 @@ public class SettingActivity extends BaseActivity {
         setContentView(R.layout.activity_setting);
         Toolbar toolbar=findViewById(R.id.setting_toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if(getSupportActionBar()!=null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

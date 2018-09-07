@@ -21,8 +21,9 @@ public class NDSpinner extends AppCompatSpinner {
         boolean sameSelected = position == getSelectedItemPosition();
         super.setSelection(position, animate);
         if (sameSelected) {
-            // Spinner does not call the OnItemSelectedListener if the same item is selected, so do it manually now
-            getOnItemSelectedListener().onItemSelected(this, getSelectedView(), position, getSelectedItemId());
+            if(getOnItemSelectedListener()!=null){
+                getOnItemSelectedListener().onItemSelected(this, getSelectedView(), position, getSelectedItemId());
+            }
         }
     }
 
@@ -31,8 +32,9 @@ public class NDSpinner extends AppCompatSpinner {
         boolean sameSelected = position == getSelectedItemPosition();
         super.setSelection(position);
         if (sameSelected) {
-            // Spinner does not call the OnItemSelectedListener if the same item is selected, so do it manually now
-            getOnItemSelectedListener().onItemSelected(this, getSelectedView(), position, getSelectedItemId());
+            if(getOnItemSelectedListener()!=null){
+                getOnItemSelectedListener().onItemSelected(this, getSelectedView(), position, getSelectedItemId());
+            }
         }
     }
 }

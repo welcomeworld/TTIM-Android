@@ -4,17 +4,11 @@
 
 package cn.dmandp.netio;
 
-import android.app.Application;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
-import android.widget.Toast;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -23,20 +17,19 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-
 import cn.dmandp.common.Const;
 import cn.dmandp.common.RESP_CODE;
 import cn.dmandp.common.TYPE;
-import cn.dmandp.context.TtApplication;
-import cn.dmandp.tt.MainActivity;
 import cn.dmandp.utils.HashUtil;
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class FileThread extends Thread {
-    String TAG="FileThread";
-    int uid;
-    Context context;
-    Handler handler;
-    byte type;
+    @SuppressWarnings("FieldCanBeLocal")
+    private String TAG="FileThread";
+    private int uid;
+    private Context context;
+    private Handler handler;
+    private byte type;
 
     public FileThread(Context context, Bundle bundle, Handler handler) {
         this.context = context;
@@ -70,7 +63,9 @@ public class FileThread extends Thread {
                 }
                 String hash = HashUtil.getHash(new FileInputStream(photo), "MD5");
                 Log.i(TAG, uid + "hash:" + hash);
-                os.write(hash.getBytes());
+                if(hash!=null){
+                    os.write(hash.getBytes());
+                }
                 if (is.read() != RESP_CODE.SUCCESS) {
                     if (!existsFlag) {
                         photo.delete();
@@ -81,7 +76,7 @@ public class FileThread extends Thread {
                 Log.i(TAG, "File created");
                 FileOutputStream fos = new FileOutputStream(photo);
                 byte[] fileBytes = new byte[1024];
-                int length = 0;
+                int length;
                 int count = 0;
                 while ((length = is.read(fileBytes, 0, fileBytes.length)) != -1) {
                     count = count + length;
@@ -107,7 +102,7 @@ public class FileThread extends Thread {
                 Log.i(TAG, "File created");
                 FileInputStream fis = new FileInputStream(photo);
                 byte[] fileBytes = new byte[1024];
-                int length = 0;
+                int length;
                 int count = 0;
                 while ((length = fis.read(fileBytes, 0, fileBytes.length)) != -1) {
                     count = count + length;
