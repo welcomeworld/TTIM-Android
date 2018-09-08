@@ -54,4 +54,5 @@
     <string name="up_flow">上行流量 \n</string>
     <string name="down_flow">下行流量 </string>
     <string name="refresh">下拉刷新</string>
+    <string name="function_give_up">此功能正在开发中</string>
 </resources>

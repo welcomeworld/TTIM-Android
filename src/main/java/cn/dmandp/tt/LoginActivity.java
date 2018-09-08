@@ -91,6 +91,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 Intent intent = new Intent(this, RegisterActivity.class);
                 startActivity(intent);
                 break;
+            case R.id.login_forget_password_button:
+                Toast.makeText(this,getResources().getString(R.string.function_give_up),Toast.LENGTH_SHORT).show();
+                break;
             default:
         }
     }

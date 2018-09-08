@@ -55,4 +55,5 @@
     <string name="up_flow">upstream traffic \n</string>
     <string name="down_flow">downstream traffic </string>
     <string name="refresh">pull down refresh</string>
+    <string name="function_give_up">module have been given up</string>
 </resources>

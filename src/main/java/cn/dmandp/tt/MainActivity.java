@@ -392,7 +392,6 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onItemClick(View view, FavoriteRecyclerViewItem currentView) {
                 if (view.getId() == R.id.recyclerview_favorite_delete) {
-                    Toast.makeText(MainActivity.this, "you onclick:delete", Toast.LENGTH_LONG).show();
                     TTIMPacket favoritePacket = new TTIMPacket();
                     TTMessage.Builder builder = TTMessage.newBuilder();
                     builder.setMContent(currentView.getMessage());
@@ -705,7 +704,7 @@ public class MainActivity extends BaseActivity {
                         button.setEnabled(false);
                         break;
                     case R.id.menu_main_scan:
-                        Toast.makeText(MainActivity.this, "your click the scan!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, getResources().getString(R.string.function_give_up), Toast.LENGTH_SHORT).show();
                         break;
                     default:
                         break;
