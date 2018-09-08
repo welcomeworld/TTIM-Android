@@ -2,12 +2,11 @@ TTIM-Android
 =
   其实我本来只是想学一下Java的网络编程用一下异步socket,然后发现t-io,去学了一下发现娘的Android要Android7还是几来着才支持异步socket,t-ioAndroid不能用……。<br>
 所以就想着自己试试写一下看看233，然后就变成了现在这样子，中途感觉最初的设计不OK本来想放弃了，后来又咬咬牙坚持了下去（因为自己以前总是太习惯放弃了）。现在虽然还有一点问题，不过总算大体完成了……   
-最近一段时间都不会动这个了（有点想搞个简化版bilibili，能看番剧下番剧就行了233），加上准备找实习了（不知道能不能找到工作，唉）。
-![展示图](https://dmandp.cn/Images/1.jpg)
+最近一段时间都不会动这个了（有点想搞个简化版bilibili，能看番剧下番剧就行了233），加上准备找实习了（不知道能不能找到工作，唉）。<br>
 
-![展示图](https://dmandp.cn/Images/2.jpg)  
-
-![展示图](https://dmandp.cn/Images/3.jpg)
+![展示图](https://dmandp.cn/Images/1.jpg)<br>
+![展示图](https://dmandp.cn/Images/2.jpg)<br>
+![展示图](https://dmandp.cn/Images/3.jpg)<br>
 
                    GNU LESSER GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
