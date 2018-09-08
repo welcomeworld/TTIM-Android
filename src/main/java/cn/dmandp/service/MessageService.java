@@ -58,6 +58,7 @@ import cn.dmandp.tt.ConversationActivity;
 import cn.dmandp.tt.LoginActivity;
 import cn.dmandp.tt.MainActivity;
 import cn.dmandp.tt.R;
+import cn.dmandp.tt.RegisterActivity;
 import cn.dmandp.utils.ImageUtil;
 
 /**
@@ -773,6 +774,30 @@ public class MessageService extends Service {
                                Log.e(TAG,e.getMessage());
                             }
                         }
+                    }
+                    break;
+                case TYPE.REGISTER_RESP:
+                    Log.i(TAG, "register...");
+                    if(body==null){
+                        return;
+                    }
+                    RegisterActivity registerActivity= (RegisterActivity) SessionContext.activities.get("RegisterActivity");
+                    if(registerActivity==null){
+                        return;
+                    }
+                    if(body[0]==RESP_CODE.SUCCESS){
+                        TTUser registerUser= (TTUser) sessionContext.getAttribute("registerUser");
+                        sessionContext.setBindUser(registerUser);
+                        sessionContext.setLogin(true);
+                        sessionContext.setuID(registerUser.getUId());
+                        SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
+                        editor.putInt("currentUserId", registerUser.getUId());
+                        editor.putString("currentUserPassword", registerUser.getUPassword());
+                        editor.putString("currentUserName", registerUser.getUName());
+                        editor.apply();
+                        Intent mainIntent=new Intent("cn.dmandp.tt.action.MAINACTIVITY");
+                        registerActivity.startActivity(mainIntent);
+                        registerActivity.finish();
                     }
                     break;
             }
